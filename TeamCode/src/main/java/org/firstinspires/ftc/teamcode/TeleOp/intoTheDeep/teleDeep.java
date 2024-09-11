@@ -7,26 +7,33 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name="teleDeep", group="intoTheDeep")
 
 public class teleDeep extends LinearOpMode {
-    // declare motors
+
+    // declare drivetrain motors
     private DcMotor bl = null;
     private DcMotor br = null;
     private DcMotor fl = null;
     private DcMotor fr = null;
 
+    // declare secondary motors
+    private DcMotor s = null;
+
+
     @Override
     public void runOpMode() {
 
-        // Init and set up motors.
+        // init and set up motors
         bl = hardwareMap.get(DcMotor.class, "backLeft");
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
+        s = hardwareMap.get(DcMotor.class, "s");
 
         // declare variables
-        float leftPower;
-        float rightPower;
-        float leftStrafe;
-        float rightStrafe;
+        double leftPower;
+        double rightPower;
+        double leftStrafe;
+        double rightStrafe;
+        double sPower = 1.0;
 
         final double diagonalStrafePower = 1.0;
 
@@ -44,6 +51,15 @@ public class teleDeep extends LinearOpMode {
 
             br.setPower(rightPower);
             fr.setPower(rightPower);
+
+            if (gamepad2.left_bumper) {
+                s.setPower(sPower);
+            } else if (gamepad2.right_bumper) {
+                s.setPower(-sPower);
+            } else {
+                s.setPower(0);
+            }
+
         }
     }
 }

@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.TeleOp.oldScripts;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+@Disabled
 @TeleOp(name="wyatts_servo_stuff", group="misc")
 
 public class wyatts_servo_stuff extends LinearOpMode {

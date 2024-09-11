@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.TeleOp.oldScripts;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
+@Disabled
 @TeleOp (name="TeleOp_Tank", group="old_teleOP")
 
 public class TeleOp_Tank extends LinearOpMode {
