@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="teleDeep", group="intoTheDeep")
 
@@ -14,8 +16,12 @@ public class teleDeep extends LinearOpMode {
     private DcMotor fl = null;
     private DcMotor fr = null;
 
+    private CRServo intake = null;
+
+
+
     // declare secondary motors
-    private DcMotor s = null;
+    private DcMotor elbow = null;
 
 
     @Override
@@ -26,15 +32,18 @@ public class teleDeep extends LinearOpMode {
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
-        s = hardwareMap.get(DcMotor.class, "s");
+        elbow = hardwareMap.get(DcMotor.class, "elbow");
+        intake = hardwareMap.get(CRServo.class, "intake1");
 
         // declare variables
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
-        double sPower = 1.0;
+        double intakePower;
 
+        // declare speed constants
+        final double ePower = 1.0;
         final double diagonalStrafePower = 1.0;
 
         waitForStart();
@@ -53,12 +62,33 @@ public class teleDeep extends LinearOpMode {
             fr.setPower(rightPower);
 
             if (gamepad2.left_bumper) {
-                s.setPower(sPower);
+
+                elbow.setPower(ePower);
+
             } else if (gamepad2.right_bumper) {
-                s.setPower(-sPower);
+
+                elbow.setPower(-ePower);
+
             } else {
-                s.setPower(0);
+
+                elbow.setPower(0);
             }
+
+            if (gamepad2.dpad_left) {
+
+                intakePower = -1.0;
+
+            } else if (gamepad2.dpad_right) {
+
+                intakePower = 1.0;
+
+            } else {
+
+                intakePower = 0;
+
+            }
+
+            intake.setPower(intakePower);
 
         }
     }
