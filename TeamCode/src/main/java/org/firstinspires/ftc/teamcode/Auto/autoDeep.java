@@ -64,6 +64,152 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
+        reset();
+    }
+    private void posTurnRight (double tps, int pos) {
+
+        bl.setTargetPosition(pos);
+        fl.setTargetPosition(pos);
+        fr.setTargetPosition(-pos);
+        br.setTargetPosition(-pos);
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+
+        bl.setVelocity(Math.abs(tps));
+        fl.setVelocity(Math.abs(tps));
+        fr.setVelocity(Math.abs(tps));
+        br.setVelocity(Math.abs(tps));
+
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()) {
+            idle();
+        }
+
+        reset();
+    }
+
+    private void posTurnLeft (double tps, int pos) {
+
+        bl.setTargetPosition(-pos);
+        fl.setTargetPosition(-pos);
+        fr.setTargetPosition(pos);
+        br.setTargetPosition(pos);
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+
+        bl.setVelocity(Math.abs(tps));
+        fl.setVelocity(Math.abs(tps));
+        fr.setVelocity(Math.abs(tps));
+        br.setVelocity(Math.abs(tps));
+
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()) {
+            idle();
+        }
+
+        reset();
+    }
+
+    private void posReverse (double tps, int pos) {
+
+        bl.setTargetPosition(-pos);
+        fl.setTargetPosition(-pos);
+        fr.setTargetPosition(-pos);
+        br.setTargetPosition(-pos);
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+
+        bl.setVelocity(Math.abs(tps));
+        fl.setVelocity(Math.abs(tps));
+        fr.setVelocity(Math.abs(tps));
+        br.setVelocity(Math.abs(tps));
+
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+            idle();
+        }
+
+        reset();
+    }
+    private void posStrafeLeft (double tps, int pos) {
+
+        bl.setTargetPosition(pos);
+        fl.setTargetPosition(-pos);
+        fr.setTargetPosition(pos);
+        br.setTargetPosition(-pos);
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+
+        bl.setVelocity(Math.abs(tps));
+        fl.setVelocity(Math.abs(tps));
+        fr.setVelocity(Math.abs(tps));
+        br.setVelocity(Math.abs(tps));
+
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+            idle();
+        }
+
+        reset();
+    }
+
+    private void posStrafeRight (double tps, int pos) {
+
+        bl.setTargetPosition(-pos);
+        fl.setTargetPosition(pos);
+        fr.setTargetPosition(-pos);
+        br.setTargetPosition(pos);
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+
+        bl.setVelocity(Math.abs(tps));
+        fl.setVelocity(Math.abs(tps));
+        fr.setVelocity(Math.abs(tps));
+        br.setVelocity(Math.abs(tps));
+
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+            idle();
+        }
+
+        reset();
+    }
+
+    private void stop(double time) {
+
+        bl.setPower(0);
+        fl.setPower(0);
+        fr.setPower(0);
+        br.setPower(0);
+
+        while (opModeIsActive() && (runtime.seconds() <= Math.abs(time))) {
+            idle();
+        } runtime.reset();
+
+    }
+
+    private void reset () {
+
         bl.setPower(0);
         fl.setPower(0);
         fr.setPower(0);
