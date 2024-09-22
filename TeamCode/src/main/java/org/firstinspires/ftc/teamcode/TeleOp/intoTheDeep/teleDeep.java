@@ -16,13 +16,9 @@ public class teleDeep extends LinearOpMode {
     private DcMotor fl = null;
     private DcMotor fr = null;
 
-    private CRServo intake = null;
-
-
-
     // declare secondary motors
     private DcMotorEx wrist = null;
-
+    private CRServo intake = null;
 
     @Override
     public void runOpMode() {
@@ -40,19 +36,19 @@ public class teleDeep extends LinearOpMode {
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // declare variables
+        // declare variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
-        double intakePower;
         double lWristPower;
         double rWristPower;
         String mode = "unlocked";
         long lockTime = 0;
 
-        // declare speed constants
+        // declare speed constants (immutable)
         final double diagonalStrafePower = 1.0;
+        final double intakePower = 1.0;
 
         waitForStart();
 
@@ -92,13 +88,13 @@ public class teleDeep extends LinearOpMode {
 
 
             if (gamepad2.dpad_left) {
-                intakePower = -1.0;
+                intake.setPower(-intakePower);
 
             } else if (gamepad2.dpad_right) {
-                intakePower = 1.0;
+                intake.setPower(intakePower);
 
             } else {
-                intakePower = 0;
+                intake.setPower(0);
             }
 
             if (gamepad2.dpad_up) {
@@ -113,7 +109,7 @@ public class teleDeep extends LinearOpMode {
                 } while (gamepad2.dpad_down);
             }
 
-            intake.setPower(intakePower);
+
 
         }
     }
