@@ -53,7 +53,7 @@ public class autoDeep extends LinearOpMode {
         fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s)
 
         bl.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
@@ -64,7 +64,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
     private void posTurnRight (double tps, int pos) {
 
@@ -78,8 +78,6 @@ public class autoDeep extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
-
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
@@ -89,7 +87,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
 
     private void posTurnLeft (double tps, int pos) {
@@ -104,8 +102,6 @@ public class autoDeep extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
-
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
@@ -115,7 +111,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
 
     private void posReverse (double tps, int pos) {
@@ -130,8 +126,6 @@ public class autoDeep extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
-
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
@@ -141,7 +135,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
     private void posStrafeLeft (double tps, int pos) {
 
@@ -155,8 +149,6 @@ public class autoDeep extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
-
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
@@ -166,7 +158,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
 
     private void posStrafeRight (double tps, int pos) {
@@ -181,8 +173,6 @@ public class autoDeep extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s.
-
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
@@ -192,7 +182,7 @@ public class autoDeep extends LinearOpMode {
             idle();
         }
 
-        reset();
+        resetMotorsAndTime();
     }
 
     private void stop(double time) {
@@ -208,7 +198,7 @@ public class autoDeep extends LinearOpMode {
 
     }
 
-    private void reset () {
+    private void resetMotorsAndTime() {
 
         bl.setPower(0);
         fl.setPower(0);

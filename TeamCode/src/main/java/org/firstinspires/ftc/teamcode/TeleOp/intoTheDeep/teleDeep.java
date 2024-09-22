@@ -49,6 +49,7 @@ public class teleDeep extends LinearOpMode {
         double lWristPower;
         double rWristPower;
         String mode = "unlocked";
+        long lockTime = 0;
 
         // declare speed constants
         final double diagonalStrafePower = 1.0;
@@ -82,9 +83,9 @@ public class teleDeep extends LinearOpMode {
                     int pos = wrist.getCurrentPosition();
                     wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    wrist.setVelocity(1000);
+                    wrist.setVelocity(500);
                     while (true) {
-                        sleep(30000);
+                        sleep(lockTime);
                     }
 
             }
@@ -108,6 +109,7 @@ public class teleDeep extends LinearOpMode {
             } else if (gamepad2.dpad_down) {
                 do {
                     mode = "unlocked";
+                    lockTime = lockTime++;
                 } while (gamepad2.dpad_down);
             }
 
