@@ -45,6 +45,7 @@ public class teleDeep extends LinearOpMode {
         double rWristPower;
         String mode = "unlocked";
         long lockTime = 0;
+        int pos;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 1.0;
@@ -68,6 +69,64 @@ public class teleDeep extends LinearOpMode {
             br.setPower(rightPower);
             fr.setPower(rightPower);
 
+            // strafe left and right
+            if (gamepad1.left_trigger > 0) {
+
+                bl.setPower(-leftStrafe);
+                fl.setPower(leftStrafe);
+
+                br.setPower(-leftStrafe);
+                fr.setPower(leftStrafe);
+
+            } else if (gamepad1.right_trigger > 0) {
+
+                bl.setPower(rightStrafe);
+                fl.setPower(-rightStrafe);
+
+                br.setPower(rightStrafe);
+                fr.setPower(-rightStrafe);
+            }
+
+            if (gamepad1.dpad_up && gamepad1.left_bumper) {
+
+                bl.setPower(-diagonalStrafePower);
+                fl.setPower(0);
+
+                br.setPower(0);
+                fr.setPower(diagonalStrafePower);
+                // upLeft
+
+            } else if (gamepad1.dpad_down && gamepad1.left_bumper) {
+
+                bl.setPower(0);
+                fl.setPower(diagonalStrafePower);
+
+                br.setPower(-diagonalStrafePower);
+                fr.setPower(0);
+                // downLeft
+
+            } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
+
+
+                bl.setPower(0);
+                fl.setPower(-diagonalStrafePower);
+
+                br.setPower(diagonalStrafePower);
+                fr.setPower(0);
+                // upRight
+
+            } else if (gamepad1.dpad_down && gamepad1.right_bumper) {
+
+                bl.setPower(diagonalStrafePower);
+                fl.setPower(0);
+
+                br.setPower(0);
+                fr.setPower(-diagonalStrafePower);
+
+                // downRight
+
+            }
+
             switch (mode) {
 
                 case "unlocked":
@@ -76,11 +135,11 @@ public class teleDeep extends LinearOpMode {
                     break;
 
                 case "locked":
-                    int pos = wrist.getCurrentPosition();
+                    pos = wrist.getCurrentPosition();
                     wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    wrist.setVelocity(500);
-                    while (true) {
+                    wrist.setVelocity(1000);
+                    while (opModeIsActive()) {
                         sleep(lockTime);
                     }
 
@@ -100,12 +159,12 @@ public class teleDeep extends LinearOpMode {
             if (gamepad2.dpad_up) {
                 do {
                     mode = "locked";
+                    lockTime = lockTime++;
                 } while (gamepad2.dpad_up);
 
             } else if (gamepad2.dpad_down) {
                 do {
                     mode = "unlocked";
-                    lockTime = lockTime++;
                 } while (gamepad2.dpad_down);
             }
 
