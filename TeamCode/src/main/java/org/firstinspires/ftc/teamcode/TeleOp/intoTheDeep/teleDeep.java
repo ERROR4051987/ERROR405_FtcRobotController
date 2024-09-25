@@ -44,7 +44,7 @@ public class teleDeep extends LinearOpMode {
         // change properties of the wrist & elbow motor
         wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -64,13 +64,20 @@ public class teleDeep extends LinearOpMode {
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.5;
         final double intakePower = 1.0;
-        final double elbowVel = 500;
+        final double elbowVel = 1000;
+        final double wristVel = 200;
 
         color.initialize();
 
         waitForStart();
 
         while (opModeIsActive()) {
+
+
+            telemetry.addData("wristMode", wristMode);
+            telemetry.addData("twinTowerMode", twinTowerMode);
+            telemetry.update();
+
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -147,21 +154,23 @@ public class teleDeep extends LinearOpMode {
             switch (wristMode) {
 
                 case "unlocked":
-                    wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    telemetry.addData("wristMode", "unlocked");
-                    telemetry.update();
-                    wrist.setPower(rWristPower);
-                    wrist.setPower(lWristPower);
+                    wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    if (gamepad2.left_trigger > 0) {
+                        wrist.setVelocity(-wristVel);
+                    } else if (gamepad2.right_trigger > 0) {
+                        wrist.setVelocity(wristVel);
+                    } else {
+                        wrist.setVelocity(0);
+                    }
+
                     break;
 
                 case "locked":
-                    telemetry.addData("wristMode", "locked");
-                    telemetry.update();
                     pos = wrist.getCurrentPosition();
                     wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     wrist.setVelocity(5000);
-                    while (opModeIsActive() && wristMode == "locked") {
+                    while (opModeIsActive() && !gamepad2.dpad_down) {
                         sleep(1);
                     }
                     break;
@@ -172,10 +181,6 @@ public class teleDeep extends LinearOpMode {
 
                 case "unlocked":
                     elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    telemetry.addLine();
-                    telemetry.addData("twinTowerMode", "unlocked");
-                    telemetry.update();
-
                     if (gamepad2.left_bumper) {
                         elbow.setVelocity(-elbowVel);
                     } else if (gamepad2.right_bumper) {
@@ -186,25 +191,21 @@ public class teleDeep extends LinearOpMode {
                     break;
 
                 case "locked":
-                    telemetry.addLine();
-                    telemetry.addData("twinTowerMode", "locked");
-                    telemetry.update();
                     pos = elbow.getCurrentPosition();
                     elbow.setTargetPosition(pos);
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     elbow.setVelocity(5000);
-                    while (opModeIsActive() && twinTowerMode == "locked") {
+                    while (opModeIsActive() && !gamepad2.dpad_right) {
                         sleep(1);
                     }
                     break;
 
             }
 
-
-            if (gamepad2.dpad_left) {
+            if (gamepad2.a) {
                 intake.setPower(-intakePower);
 
-            } else if (gamepad2.dpad_right) {
+            } else if (gamepad2.b) {
                 intake.setPower(intakePower);
 
             } else {
