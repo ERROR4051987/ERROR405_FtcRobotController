@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -18,7 +19,11 @@ public class teleDeep extends LinearOpMode {
 
     // declare secondary motors
     private DcMotorEx wrist = null;
+    private DcMotorEx elbow = null;
     private CRServo intake = null;
+
+    // declare sensors
+    private RevColorSensorV3 color = null;
 
     @Override
     public void runOpMode() {
@@ -29,12 +34,21 @@ public class teleDeep extends LinearOpMode {
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
         wrist = hardwareMap.get(DcMotorEx.class, "wrist");
+        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
+
+        // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
-        // change properties of the wrist motor
+        color = hardwareMap.get(RevColorSensorV3.class, "color");
+
+        // change properties of the wrist & elbow motor
         wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // declare variables (mutable)
         double leftPower;
@@ -43,13 +57,16 @@ public class teleDeep extends LinearOpMode {
         double rightStrafe;
         double lWristPower;
         double rWristPower;
-        String mode = "unlocked";
-        long lockTime = 0;
+        String wristMode = "unlocked";
+        String twinTowerMode = "unlocked";
         int pos;
 
         // declare speed constants (immutable)
-        final double diagonalStrafePower = 1.0;
+        final double diagonalStrafePower = 0.5;
         final double intakePower = 1.0;
+        final double elbowVel = 500;
+
+        color.initialize();
 
         waitForStart();
 
@@ -127,21 +144,59 @@ public class teleDeep extends LinearOpMode {
 
             }
 
-            switch (mode) {
+            switch (wristMode) {
 
                 case "unlocked":
+                    wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    telemetry.addData("wristMode", "unlocked");
+                    telemetry.update();
                     wrist.setPower(rWristPower);
                     wrist.setPower(lWristPower);
                     break;
 
                 case "locked":
+                    telemetry.addData("wristMode", "locked");
+                    telemetry.update();
                     pos = wrist.getCurrentPosition();
                     wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    wrist.setVelocity(1000);
-                    while (opModeIsActive()) {
-                        sleep(lockTime);
+                    wrist.setVelocity(5000);
+                    while (opModeIsActive() && wristMode == "locked") {
+                        sleep(1);
                     }
+                    break;
+
+            }
+
+            switch (twinTowerMode) {
+
+                case "unlocked":
+                    elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    telemetry.addLine();
+                    telemetry.addData("twinTowerMode", "unlocked");
+                    telemetry.update();
+
+                    if (gamepad2.left_bumper) {
+                        elbow.setVelocity(-elbowVel);
+                    } else if (gamepad2.right_bumper) {
+                        elbow.setVelocity(elbowVel);
+                    } else {
+                        elbow.setVelocity(0);
+                    }
+                    break;
+
+                case "locked":
+                    telemetry.addLine();
+                    telemetry.addData("twinTowerMode", "locked");
+                    telemetry.update();
+                    pos = elbow.getCurrentPosition();
+                    elbow.setTargetPosition(pos);
+                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    elbow.setVelocity(5000);
+                    while (opModeIsActive() && twinTowerMode == "locked") {
+                        sleep(1);
+                    }
+                    break;
 
             }
 
@@ -158,17 +213,29 @@ public class teleDeep extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 do {
-                    mode = "locked";
-                    lockTime = lockTime++;
+                    wristMode = "locked";
+
                 } while (gamepad2.dpad_up);
 
             } else if (gamepad2.dpad_down) {
                 do {
-                    mode = "unlocked";
+                    wristMode = "unlocked";
+
                 } while (gamepad2.dpad_down);
             }
 
+            if (gamepad2.dpad_left) {
+                do {
+                    twinTowerMode = "locked";
 
+                } while (gamepad2.dpad_left);
+
+            } else if (gamepad2.dpad_right) {
+                do {
+                    twinTowerMode = "unlocked";
+
+                } while (gamepad2.dpad_right);
+            }
 
         }
     }
