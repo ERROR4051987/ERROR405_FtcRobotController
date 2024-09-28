@@ -6,13 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.StateMachine;
+@TeleOp(name="teleDeepTesting", group="intoTheDeep")
 
-@TeleOp(name="teleDeep", group="intoTheDeep")
-
-public class teleDeep extends LinearOpMode {
+public class teleDeepTesting extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotor bl = null;
@@ -174,9 +171,6 @@ public class teleDeep extends LinearOpMode {
                     wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     wrist.setVelocity(5000);
-                    while (opModeIsActive() && !gamepad2.dpad_down) {
-                        sleep(1);
-                    }
                     break;
 
             }
@@ -200,9 +194,6 @@ public class teleDeep extends LinearOpMode {
                     elbow.setTargetPosition(pos);
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     elbow.setVelocity(5000);
-                    while (opModeIsActive() && !gamepad2.dpad_right) {
-                        sleep(1);
-                    }
                     break;
 
             }
