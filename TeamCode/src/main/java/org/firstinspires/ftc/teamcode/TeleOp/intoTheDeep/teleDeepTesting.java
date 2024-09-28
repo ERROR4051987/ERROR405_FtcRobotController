@@ -66,6 +66,8 @@ public class teleDeepTesting extends LinearOpMode {
         final double elbowVel = 1000;
         final double wristVel = 200;
 
+        int pos;
+
         color.initialize();
 
         waitForStart();
@@ -165,9 +167,10 @@ public class teleDeepTesting extends LinearOpMode {
                     break;
 
                 case "locked":
-                        pos = wrist.getCurrentPosition();
-                        wrist.setTargetPosition(pos);
+                    pos = wrist.getCurrentPosition();
+                    wrist.setTargetPosition(pos);
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    wrist.setPositionPIDFCoefficients(0.01);
                     break;
 
             }
