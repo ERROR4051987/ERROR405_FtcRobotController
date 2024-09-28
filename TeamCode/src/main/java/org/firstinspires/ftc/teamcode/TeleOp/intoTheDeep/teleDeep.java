@@ -6,10 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.StateMachine;
 
 @TeleOp(name="teleDeep", group="intoTheDeep")
 
@@ -155,7 +151,6 @@ public class teleDeep extends LinearOpMode {
 
             }
 
-            // wrist code
             switch (wristMode) {
 
                 case "unlocked":
@@ -165,7 +160,7 @@ public class teleDeep extends LinearOpMode {
                     } else if (gamepad2.right_trigger > 0) {
                         wrist.setVelocity(wristVel);
                     } else {
-                        wrist.setPower(0);
+                        wrist.setVelocity(0);
                     }
 
                     break;
@@ -182,7 +177,6 @@ public class teleDeep extends LinearOpMode {
 
             }
 
-            // elbow code
             switch (twinTowerMode) {
 
                 case "unlocked":
@@ -207,7 +201,7 @@ public class teleDeep extends LinearOpMode {
                     break;
 
             }
-            // intake code
+
             if (gamepad2.a) {
                 intake.setPower(-intakePower);
 
@@ -217,7 +211,6 @@ public class teleDeep extends LinearOpMode {
             } else {
                 intake.setPower(0);
             }
-
 
             if (gamepad2.dpad_up) {
                 do {

@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 @TeleOp(name="teleDeepTesting", group="intoTheDeep")
 
@@ -60,7 +59,6 @@ public class teleDeepTesting extends LinearOpMode {
         double rWristPower;
         String wristMode = "unlocked";
         String twinTowerMode = "unlocked";
-        int pos = 0;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.5;
@@ -76,7 +74,6 @@ public class teleDeepTesting extends LinearOpMode {
 
             telemetry.addData("wristMode", wristMode);
             telemetry.addData("twinTowerMode", twinTowerMode);
-            telemetry.addData("currentPos", pos);
             telemetry.update();
 
 
@@ -168,14 +165,9 @@ public class teleDeepTesting extends LinearOpMode {
                     break;
 
                 case "locked":
-                    if (pos == 0) {
                         pos = wrist.getCurrentPosition();
                         wrist.setTargetPosition(pos);
-                    }
                     wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    wrist.setPositionPIDFCoefficients(0.01);
-//                    wrist.setTargetPositionTolerance(50);
-                    wrist.setVelocity(400);
                     break;
 
             }
