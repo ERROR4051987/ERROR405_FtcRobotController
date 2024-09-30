@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@TeleOp(name="teleDeepTesting", group="intoTheDeep")
+@TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
 
 public class teleDeepTesting extends LinearOpMode {
 

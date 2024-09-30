@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.BL;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous (name= "autoDeep", group= "intoTheDeep", preselectTeleOp = "teleDeep")
-public class autoDeep extends LinearOpMode {
+@Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
+public class BLNormal extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotorEx bl = null;
@@ -43,6 +43,7 @@ public class autoDeep extends LinearOpMode {
     }
     private void posForward (double tps, int pos) {
 
+        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s)
         bl.setTargetPosition(pos);
         br.setTargetPosition(pos);
         fl.setTargetPosition(pos);
@@ -52,8 +53,6 @@ public class autoDeep extends LinearOpMode {
         br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // tps = Ticks Per Second. (ie. position = 1000, tps = 500, will reach target position in 2s)
 
         bl.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
