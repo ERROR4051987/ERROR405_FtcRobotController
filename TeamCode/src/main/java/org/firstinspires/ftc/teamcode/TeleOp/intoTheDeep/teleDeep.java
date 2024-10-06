@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@TeleOp(name="teleDeep", group="intoTheDeep")
+@TeleOp(name="teleDeepStable", group="intoTheDeep")
 
-public class teleDeep extends LinearOpMode {
+public class teleDeepStable extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotor bl = null;
