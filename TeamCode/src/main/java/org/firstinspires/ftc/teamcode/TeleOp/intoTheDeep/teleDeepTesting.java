@@ -22,9 +22,6 @@ public class teleDeepTesting extends LinearOpMode {
     private DcMotorEx elbow = null;
     private CRServo intake = null;
 
-    // declare sensors
-    private RevColorSensorV3 color = null;
-
     @Override
     public void runOpMode() {
 
@@ -38,8 +35,6 @@ public class teleDeepTesting extends LinearOpMode {
 
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
-
-        color = hardwareMap.get(RevColorSensorV3.class, "color");
 
         // change properties of the wrist & elbow motor
         wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -58,7 +53,8 @@ public class teleDeepTesting extends LinearOpMode {
         double lWristPower;
         double rWristPower;
         String wristMode = "unlocked";
-        String twinTowerMode = "unlocked";
+        String elbowMode = "unlocked";
+        int pos;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.5;
@@ -66,16 +62,12 @@ public class teleDeepTesting extends LinearOpMode {
         final double elbowVel = 1000;
         final double wristVel = 200;
 
-        int pos;
-
-        color.initialize();
-
         waitForStart();
 
         while (opModeIsActive()) {
 
             telemetry.addData("wristMode", wristMode);
-            telemetry.addData("twinTowerMode", twinTowerMode);
+            telemetry.addData("elbowMode", elbowMode);
             telemetry.update();
 
 
@@ -93,9 +85,9 @@ public class teleDeepTesting extends LinearOpMode {
             br.setPower(rightPower);
             fr.setPower(rightPower);
 
-            // strafe left and right
+            
             if (gamepad1.left_trigger > 0) {
-
+                // strafe left
                 bl.setPower(-leftStrafe);
                 fl.setPower(leftStrafe);
 
@@ -103,7 +95,7 @@ public class teleDeepTesting extends LinearOpMode {
                 fr.setPower(leftStrafe);
 
             } else if (gamepad1.right_trigger > 0) {
-
+                // strafe right
                 bl.setPower(rightStrafe);
                 fl.setPower(-rightStrafe);
 
@@ -112,43 +104,36 @@ public class teleDeepTesting extends LinearOpMode {
             }
 
             if (gamepad1.dpad_up && gamepad1.left_bumper) {
-
-                bl.setPower(-diagonalStrafePower);
+                 // strafe upLeft
+                 bl.setPower(-diagonalStrafePower);
                 fl.setPower(0);
 
                 br.setPower(0);
                 fr.setPower(diagonalStrafePower);
-                // upLeft
 
             } else if (gamepad1.dpad_down && gamepad1.left_bumper) {
-
+                // strafe downLeft
                 bl.setPower(0);
                 fl.setPower(diagonalStrafePower);
 
                 br.setPower(-diagonalStrafePower);
                 fr.setPower(0);
-                // downLeft
 
             } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
-
-
+                // strafe upRight
                 bl.setPower(0);
                 fl.setPower(-diagonalStrafePower);
 
                 br.setPower(diagonalStrafePower);
                 fr.setPower(0);
-                // upRight
 
             } else if (gamepad1.dpad_down && gamepad1.right_bumper) {
-
+                // strafe downRight
                 bl.setPower(diagonalStrafePower);
                 fl.setPower(0);
 
                 br.setPower(0);
                 fr.setPower(-diagonalStrafePower);
-
-                // downRight
-
             }
 
             // wrist code
@@ -176,7 +161,7 @@ public class teleDeepTesting extends LinearOpMode {
             }
 
             // elbow code
-            switch (twinTowerMode) {
+            switch (elbowMode) {
 
                 case "unlocked":
                     elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -199,24 +184,33 @@ public class teleDeepTesting extends LinearOpMode {
             }
             // intake code
             if (gamepad2.a) {
+                // when player 2 presses "a"
+                // suck up 1 sample
                 intake.setPower(-intakePower);
-
+                
             } else if (gamepad2.b) {
+                // when player 2 presses "b"
+                // release the sample 
                 intake.setPower(intakePower);
 
             } else {
                 intake.setPower(0);
             }
 
-
             if (gamepad2.dpad_up) {
                 do {
+                    // once "up" is pressed on the dpad
+                    // wristMode will stay locked until 
+                    // "down" is pressed
                     wristMode = "locked";
 
                 } while (gamepad2.dpad_up);
 
             } else if (gamepad2.dpad_down) {
                 do {
+                    // once "down" is pressed on the dpad
+                    // wristMode will stay unlocked until 
+                    // "up" is pressed
                     wristMode = "unlocked";
 
                 } while (gamepad2.dpad_down);
@@ -224,13 +218,19 @@ public class teleDeepTesting extends LinearOpMode {
 
             if (gamepad2.dpad_left) {
                 do {
-                    twinTowerMode = "locked";
+                    // once "left" is pressed on the dpad
+                    // elbowMode will stay locked until 
+                    // "right" is pressed
+                    elbowMode = "locked";
 
                 } while (gamepad2.dpad_left);
 
             } else if (gamepad2.dpad_right) {
                 do {
-                    twinTowerMode = "unlocked";
+                    // once "right" is pressed on the dpad
+                    // elbowMode will stay unlocked until 
+                    // "left" is pressed
+                    elbowMode = "unlocked";
 
                 } while (gamepad2.dpad_right);
             }
