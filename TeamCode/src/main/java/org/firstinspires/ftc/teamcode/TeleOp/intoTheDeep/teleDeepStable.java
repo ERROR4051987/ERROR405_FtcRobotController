@@ -28,11 +28,13 @@ public class teleDeepStable extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // init and set up motors
+        // init and set up drivetrain motors
         bl = hardwareMap.get(DcMotor.class, "backLeft");
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
+
+        // init and set up secondary motors
         wrist = hardwareMap.get(DcMotorEx.class, "wrist");
         elbow = hardwareMap.get(DcMotorEx.class, "elbow");
 

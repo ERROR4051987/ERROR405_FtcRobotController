@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.Auto.BL;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
@@ -14,6 +16,13 @@ public class BLNormal extends LinearOpMode {
     private DcMotorEx br = null;
     private DcMotorEx fl = null;
     private DcMotorEx fr = null;
+
+    // declare secondary motors
+    private DcMotorEx wrist = null;
+    private DcMotorEx elbow = null;
+
+    // declare servos
+    private CRServo intake = null;
 
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
@@ -26,18 +35,39 @@ public class BLNormal extends LinearOpMode {
         br = hardwareMap.get(DcMotorEx.class, "backRight");
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
         fr = hardwareMap.get(DcMotorEx.class, "frontRight");
-        
+
+        // set all drivetrain motors' encoders to 0
         bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // init and set up secondary motors
+        wrist = hardwareMap.get(DcMotorEx.class, "wrist");
+        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
+
+        // set all secondary motors' encoders to 0
+        wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // init and set up servos
+        intake = hardwareMap.get(CRServo.class, "intake");
+
+        // position constants
+        final int elbowVertical = -2350;
+        final int wristSlight = 150;
         
         waitForStart();
         runtime.reset();
 
         while(opModeIsActive()) {
 
-            posForward(500, 1000);
+            putPreloadIntoBasket(elbowVertical, wristSlight);
+
+            requestOpModeStop();
         }
 
     }
@@ -49,10 +79,7 @@ public class BLNormal extends LinearOpMode {
         fl.setTargetPosition(pos);
         fr.setTargetPosition(pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
@@ -72,10 +99,7 @@ public class BLNormal extends LinearOpMode {
         fr.setTargetPosition(-pos);
         br.setTargetPosition(-pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
@@ -96,10 +120,7 @@ public class BLNormal extends LinearOpMode {
         fr.setTargetPosition(pos);
         br.setTargetPosition(pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
@@ -120,10 +141,7 @@ public class BLNormal extends LinearOpMode {
         fr.setTargetPosition(-pos);
         br.setTargetPosition(-pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
@@ -143,10 +161,7 @@ public class BLNormal extends LinearOpMode {
         fr.setTargetPosition(pos);
         br.setTargetPosition(-pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
@@ -167,10 +182,7 @@ public class BLNormal extends LinearOpMode {
         fr.setTargetPosition(-pos);
         br.setTargetPosition(pos);
 
-        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        enablePos();
 
         bl.setVelocity(Math.abs(tps));
         fl.setVelocity(Math.abs(tps));
@@ -184,6 +196,40 @@ public class BLNormal extends LinearOpMode {
         resetMotorsAndTime();
     }
 
+    private void posElbow (double tps, int pos) {
+        elbow.setTargetPosition(pos);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setVelocity(tps);
+        while (elbow.isBusy()) {
+            idle();
+        } runtime.reset();
+    }
+
+    private void posWrist(double tps, int pos) {
+        wrist.setTargetPosition(pos);
+        wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wrist.setVelocity(tps);
+        while (wrist.isBusy()) {
+            idle();
+        } runtime.reset();
+    }
+
+    private void sampleSuck() {
+
+        intake.setPower(-1.0);
+        while (opModeIsActive() && (runtime.seconds() <= Math.abs(1))) {
+            idle();
+        } runtime.reset();
+    }
+
+    private void sampleSpit() {
+
+        intake.setPower(1.0);
+        while (opModeIsActive() && (runtime.seconds() <= Math.abs(3.0))) {
+            idle();
+        } runtime.reset();
+    }
+    
     private void stop(double time) {
 
         bl.setPower(0);
@@ -209,5 +255,32 @@ public class BLNormal extends LinearOpMode {
         fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         runtime.reset();
+    }
+
+    private void enablePos() {
+
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+
+    private void unloadSampleintoBasket () {
+
+    }
+
+    private void putPreloadIntoBasket (int elbowPos, int wristPos) {
+        posForward(500,400);
+        posStrafeLeft(500, 700);
+        posTurnRight(500, 500);
+
+        posElbow(1500, elbowPos);
+        posWrist(500, wristPos);
+        sampleSpit();
+    }
+
+    private void grabNeutralSamples () {
+
     }
 }
