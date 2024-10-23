@@ -41,7 +41,7 @@ public class teleDeepStable extends LinearOpMode {
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
-        color = hardwareMap.get(RevColorSensorV3.class, "color");
+        color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         // change properties of the wrist & elbow motor
         wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

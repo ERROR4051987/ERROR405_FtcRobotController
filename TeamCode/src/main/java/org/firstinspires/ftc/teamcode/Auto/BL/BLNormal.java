@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Auto.BL;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
@@ -23,6 +25,9 @@ public class BLNormal extends LinearOpMode {
 
     // declare servos
     private CRServo intake = null;
+
+    // declare sensors
+    private RevColorSensorV3 colorLeft = null;
 
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
@@ -56,16 +61,21 @@ public class BLNormal extends LinearOpMode {
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
+        // init and set up sensors
+        colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+
         // position constants
-        final int elbowVertical = -2350;
-        final int wristSlight = 150;
-        
+        final int elbowHalf = -1214;
+        final int elbowReset = 0;
+        final int wristVertical = 500;
+        final int wristReset = 0;
+
         waitForStart();
         runtime.reset();
 
         while(opModeIsActive()) {
 
-            putPreloadIntoBasket(elbowVertical, wristSlight);
+            putPreloadIntoBasket(elbowHalf, wristVertical);
 
             requestOpModeStop();
         }
@@ -214,6 +224,19 @@ public class BLNormal extends LinearOpMode {
         } runtime.reset();
     }
 
+    private void posElbowAndWrist(double elbowTps, int elbowPos,
+                                  double wristTps, int wristPos) {
+
+        elbow.setTargetPosition(elbowPos);
+        elbow.setVelocity(elbowTps);
+        wrist.setTargetPosition(wristPos);
+        wrist.setVelocity(wristTps);
+
+        while (wrist.isBusy() && elbow.isBusy()) {
+            idle();
+        } runtime.reset();
+    }
+
     private void sampleSuck() {
 
         intake.setPower(-1.0);
@@ -228,6 +251,30 @@ public class BLNormal extends LinearOpMode {
         while (opModeIsActive() && (runtime.seconds() <= Math.abs(3.0))) {
             idle();
         } runtime.reset();
+    }
+
+    private void colorScan (String location) {
+        switch (location) {
+            case "Right":
+                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
+
+                }
+                break;
+
+            case "Middle":
+                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
+
+                }
+                break;
+
+            case "Left":
+                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
+
+                }
+                break;
+        }
+
+
     }
     
     private void stop(double time) {
@@ -266,7 +313,7 @@ public class BLNormal extends LinearOpMode {
 
     }
 
-    private void unloadSampleintoBasket () {
+    private void unloadSampleintoBasket (String location) {
 
     }
 
@@ -274,13 +321,22 @@ public class BLNormal extends LinearOpMode {
         posForward(500,400);
         posStrafeLeft(500, 700);
         posTurnRight(500, 500);
-
         posElbow(1500, elbowPos);
-        posWrist(500, wristPos);
+        posElbowAndWrist(1000, elbowPos * 2, 600, wristPos);
         sampleSpit();
     }
 
     private void grabNeutralSamples () {
+        posWrist(500,0);
+        posElbow(200,0);
+        posForward(500, 200);
+        posTurnLeft(300, 500);
+        posForward(300, 100);
 
+
+    }
+
+    private void hangPreloadSpecimen () {
+        
     }
 }

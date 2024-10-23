@@ -46,7 +46,7 @@ public class teleDeepTesting extends LinearOpMode {
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
-        color = hardwareMap.get(RevColorSensorV3.class, "color");
+        color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         // change properties of the wrist & elbow motor
         wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -56,6 +56,7 @@ public class teleDeepTesting extends LinearOpMode {
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        elbow.setPositionPIDFCoefficients(100);
 
         // declare variables (mutable)
         double leftPower;
@@ -83,6 +84,8 @@ public class teleDeepTesting extends LinearOpMode {
 
             telemetry.addData("wristMode", wristMode);
             telemetry.addData("twinTowerMode", twinTowerMode);
+            telemetry.addData("elbow pidf", elbow.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
+            telemetry.addData("wrist pidf", wrist.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
             telemetry.update();
 
 
@@ -197,6 +200,7 @@ public class teleDeepTesting extends LinearOpMode {
                     break;
 
                 case "locked":
+                    elbow.setVelocityPIDFCoefficients(100, 5, 2, 0);
                     pos = elbow.getCurrentPosition();
                     elbow.setTargetPosition(pos);
                     elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
