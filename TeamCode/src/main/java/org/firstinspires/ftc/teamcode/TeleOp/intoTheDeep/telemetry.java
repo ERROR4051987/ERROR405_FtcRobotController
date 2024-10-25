@@ -1,38 +1,47 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@TeleOp(name="telemetry", group="intoTheDeep")
+@Config
+@TeleOp(name="telemetry", group="testing")
 
-public class telemetry extends LinearOpMode {
+public class telemetry extends OpMode {
 
     private DcMotorEx wrist = null;
     private DcMotorEx elbow = null;
 
+    // make funny pid
+    private PIDController controller;
+
+    // pid variables
+    static double p = 0, i = 0, d = 0;
+    static double f = 0;
+
+    static int target = 0;
+    // TODO: change ticks to actual ticks
+    final double ticksInDegree = 0;
+
     @Override
-    public void runOpMode() {
-        // init and set up secondary motors
+    public void init() {
+        controller = new PIDController(p, i, d);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         wrist = hardwareMap.get(DcMotorEx.class, "wrist");
-        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
+    }
 
-        // change properties of the wrist & elbow motor
-        wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        waitForStart();
-
-        while (opModeIsActive()) {
-            telemetry.addData("wristPos", wrist.getCurrentPosition());
-            telemetry.addData("elbowPos", elbow.getCurrentPosition());
-            telemetry.update();
-        }
+    @Override
+    public void loop() {
+        controller.setPID(p, i, d);
+        int wristPos = wrist.getCurrentPosition();
+        double pid = controller.calculate(wristPos, target);
     }
 }
+

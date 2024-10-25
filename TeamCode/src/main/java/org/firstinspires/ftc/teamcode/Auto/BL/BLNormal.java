@@ -58,6 +58,10 @@ public class BLNormal extends LinearOpMode {
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        // set all secondary motors' mode to brake
+        wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
@@ -69,6 +73,9 @@ public class BLNormal extends LinearOpMode {
         final int elbowReset = 0;
         final int wristVertical = 500;
         final int wristReset = 0;
+
+        //tps and speed constants
+        final double brake = 0;
 
         waitForStart();
         runtime.reset();
@@ -213,6 +220,7 @@ public class BLNormal extends LinearOpMode {
         while (elbow.isBusy()) {
             idle();
         } runtime.reset();
+        elbow.setPower(0);
     }
 
     private void posWrist(double tps, int pos) {
@@ -222,6 +230,7 @@ public class BLNormal extends LinearOpMode {
         while (wrist.isBusy()) {
             idle();
         } runtime.reset();
+        wrist.setPower(0);
     }
 
     private void posElbowAndWrist(double elbowTps, int elbowPos,
@@ -235,6 +244,8 @@ public class BLNormal extends LinearOpMode {
         while (wrist.isBusy() && elbow.isBusy()) {
             idle();
         } runtime.reset();
+        wrist.setPower(0);
+        elbow.setPower(0);
     }
 
     private void sampleSuck() {

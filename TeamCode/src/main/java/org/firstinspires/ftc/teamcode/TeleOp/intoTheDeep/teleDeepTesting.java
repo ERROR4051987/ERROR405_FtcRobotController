@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
