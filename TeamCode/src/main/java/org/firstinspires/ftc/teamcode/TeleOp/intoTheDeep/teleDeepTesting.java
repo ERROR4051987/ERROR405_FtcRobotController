@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
 
@@ -25,6 +27,13 @@ public class teleDeepTesting extends LinearOpMode {
 
     // declare sensors
     private RevColorSensorV3 color = null;
+
+    private PIDController wPIDF;
+
+    public static double p = -0.005, i = 0, d = 0.00002;
+    public static double f = 0.07;
+
+    public final double ticksInDegree = 1425.1;
 
     @Override
     public void runOpMode() {
@@ -50,14 +59,15 @@ public class teleDeepTesting extends LinearOpMode {
         color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         // change properties of the wrist & elbow motor
-        wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        elbow.setPositionPIDFCoefficients(100);
+
+        wPIDF = new PIDController(p, i, d);
 
         // declare variables (mutable)
         double leftPower;
@@ -66,7 +76,6 @@ public class teleDeepTesting extends LinearOpMode {
         double rightStrafe;
         double lWristPower;
         double rWristPower;
-        String wristMode = "unlocked";
         String twinTowerMode = "unlocked";
 
         // declare speed constants (immutable)
@@ -83,10 +92,9 @@ public class teleDeepTesting extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            telemetry.addData("wristMode", wristMode);
             telemetry.addData("twinTowerMode", twinTowerMode);
             telemetry.addData("elbow pidf", elbow.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
-            telemetry.addData("wrist pidf", wrist.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
+            telemetry.addData("wrist pidf", wrist.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
             telemetry.update();
 
 
@@ -98,11 +106,11 @@ public class teleDeepTesting extends LinearOpMode {
             rWristPower = gamepad2.right_trigger;
             lWristPower = -gamepad2.left_trigger;
 
-            bl.setPower(leftPower);
-            fl.setPower(leftPower);
+            bl.setPower(leftPower * 0.75);
+            fl.setPower(leftPower * 0.75);
 
-            br.setPower(rightPower);
-            fr.setPower(rightPower);
+            br.setPower(rightPower * 0.75);
+            fr.setPower(rightPower * 0.75);
 
             // strafe left and right
             if (gamepad1.left_trigger > 0) {
@@ -162,29 +170,37 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            // wrist code
-            switch (wristMode) {
+            if (gamepad2.dpad_up) {
+                wPIDF.setPID(p, i, d);
+                pos = wrist.getCurrentPosition();
+                int target = pos;
+                double pid = wPIDF.calculate(pos, target);
+                double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+                double power = pid + ff;
+                wrist.setPower(power);
 
-                case "unlocked":
-                    wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    if (gamepad2.left_trigger > 0) {
-                        wrist.setVelocity(wristVel);
-                    } else if (gamepad2.right_trigger > 0) {
-                        wrist.setVelocity(-wristVel);
-                    } else {
-                        wrist.setPower(0);
-                    }
-
-                    break;
-
-                case "locked":
-                    pos = wrist.getCurrentPosition();
-                    wrist.setTargetPosition(pos);
-                    wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    wrist.setPositionPIDFCoefficients(0.01);
-                    break;
+            } else {
+                wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                if (gamepad2.left_trigger > 0) {
+                    wrist.setVelocity(wristVel);
+                } else if (gamepad2.right_trigger > 0) {
+                    wrist.setVelocity(-wristVel);
+                } else {
+                    wrist.setPower(0);
+                }
 
             }
+
+
+
+
+
+
+
+
+
+
+
 
             // elbow code
             switch (twinTowerMode) {
@@ -220,19 +236,6 @@ public class teleDeepTesting extends LinearOpMode {
                 intake.setPower(0);
             }
 
-
-            if (gamepad2.dpad_up) {
-                do {
-                    wristMode = "locked";
-
-                } while (gamepad2.dpad_up);
-
-            } else if (gamepad2.dpad_down) {
-                do {
-                    wristMode = "unlocked";
-
-                } while (gamepad2.dpad_down);
-            }
 
             if (gamepad2.dpad_left) {
                 do {
