@@ -204,54 +204,55 @@ public class teleDeepTesting extends LinearOpMode {
                 } while (gamepad2.y);
 
 
-            // elbow code
-            switch (twinTowerMode) {
+                // elbow code
+                switch (twinTowerMode) {
 
-                case "unlocked":
-                    elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    if (gamepad2.left_bumper) {
-                        elbow.setVelocity(elbowVel);
-                    } else if (gamepad2.right_bumper) {
-                        elbow.setVelocity(-elbowVel);
-                    } else {
-                        elbow.setVelocity(0);
-                    }
-                    break;
+                    case "unlocked":
+                        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        if (gamepad2.left_bumper) {
+                            elbow.setVelocity(elbowVel);
+                        } else if (gamepad2.right_bumper) {
+                            elbow.setVelocity(-elbowVel);
+                        } else {
+                            elbow.setVelocity(0);
+                        }
+                        break;
 
-                case "locked":
-                    elbow.setVelocityPIDFCoefficients(100, 5, 2, 0);
-                    pos = elbow.getCurrentPosition();
-                    elbow.setTargetPosition(pos);
-                    elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    elbow.setVelocity(5000);
-                    break;
+                    case "locked":
+                        elbow.setVelocityPIDFCoefficients(100, 5, 2, 0);
+                        pos = elbow.getCurrentPosition();
+                        elbow.setTargetPosition(pos);
+                        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        elbow.setVelocity(5000);
+                        break;
+
+                }
+                // intake code
+                if (gamepad2.a) {
+                    intake.setPower(-intakePower);
+
+                } else if (gamepad2.b) {
+                    intake.setPower(intakePower);
+
+                } else {
+                    intake.setPower(0);
+                }
+
+
+                if (gamepad2.dpad_left) {
+                    do {
+                        twinTowerMode = "locked";
+
+                    } while (gamepad2.dpad_left);
+
+                } else if (gamepad2.dpad_right) {
+                    do {
+                        twinTowerMode = "unlocked";
+
+                    } while (gamepad2.dpad_right);
+                }
 
             }
-            // intake code
-            if (gamepad2.a) {
-                intake.setPower(-intakePower);
-
-            } else if (gamepad2.b) {
-                intake.setPower(intakePower);
-
-            } else {
-                intake.setPower(0);
-            }
-
-
-            if (gamepad2.dpad_left) {
-                do {
-                    twinTowerMode = "locked";
-
-                } while (gamepad2.dpad_left);
-
-            } else if (gamepad2.dpad_right) {
-                do {
-                    twinTowerMode = "unlocked";
-
-                } while (gamepad2.dpad_right);
-            }
-
         }
     }
 }
