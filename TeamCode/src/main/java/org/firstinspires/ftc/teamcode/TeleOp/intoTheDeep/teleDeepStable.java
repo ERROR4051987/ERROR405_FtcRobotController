@@ -68,6 +68,7 @@ public class teleDeepStable extends LinearOpMode {
         final double intakePower = 1.0;
         final double elbowVel = 1000;
         final double wristVel = 200;
+        final double driveTrainScalar = 0.85;
 
         color.initialize();
 
@@ -89,45 +90,45 @@ public class teleDeepStable extends LinearOpMode {
             rWristPower = gamepad2.right_trigger;
             lWristPower = -gamepad2.left_trigger;
 
-            bl.setPower(leftPower);
-            fl.setPower(leftPower);
+            bl.setPower(leftPower * driveTrainScalar);
+            fl.setPower(leftPower * driveTrainScalar);
 
-            br.setPower(rightPower);
-            fr.setPower(rightPower);
+            br.setPower(rightPower * driveTrainScalar);
+            fr.setPower(rightPower * driveTrainScalar);
 
             // strafe left and right
             if (gamepad1.left_trigger > 0) {
 
-                bl.setPower(-leftStrafe);
-                fl.setPower(leftStrafe);
+                bl.setPower(-leftStrafe * driveTrainScalar);
+                fl.setPower(leftStrafe * driveTrainScalar);
 
-                br.setPower(-leftStrafe);
-                fr.setPower(leftStrafe);
+                br.setPower(-leftStrafe * driveTrainScalar);
+                fr.setPower(leftStrafe * driveTrainScalar);
 
             } else if (gamepad1.right_trigger > 0) {
 
-                bl.setPower(rightStrafe);
-                fl.setPower(-rightStrafe);
+                bl.setPower(rightStrafe * driveTrainScalar);
+                fl.setPower(-rightStrafe * driveTrainScalar);
 
-                br.setPower(rightStrafe);
-                fr.setPower(-rightStrafe);
+                br.setPower(rightStrafe * driveTrainScalar);
+                fr.setPower(-rightStrafe * driveTrainScalar);
             }
 
             if (gamepad1.dpad_up && gamepad1.left_bumper) {
 
-                bl.setPower(-diagonalStrafePower);
+                bl.setPower(-diagonalStrafePower * driveTrainScalar);
                 fl.setPower(0);
 
                 br.setPower(0);
-                fr.setPower(diagonalStrafePower);
+                fr.setPower(diagonalStrafePower * driveTrainScalar);
                 // upLeft
 
             } else if (gamepad1.dpad_down && gamepad1.left_bumper) {
 
                 bl.setPower(0);
-                fl.setPower(diagonalStrafePower);
+                fl.setPower(diagonalStrafePower * driveTrainScalar);
 
-                br.setPower(-diagonalStrafePower);
+                br.setPower(-diagonalStrafePower * driveTrainScalar);
                 fr.setPower(0);
                 // downLeft
 
@@ -135,19 +136,19 @@ public class teleDeepStable extends LinearOpMode {
 
 
                 bl.setPower(0);
-                fl.setPower(-diagonalStrafePower);
+                fl.setPower(-diagonalStrafePower * driveTrainScalar);
 
-                br.setPower(diagonalStrafePower);
+                br.setPower(diagonalStrafePower * driveTrainScalar);
                 fr.setPower(0);
                 // upRight
 
             } else if (gamepad1.dpad_down && gamepad1.right_bumper) {
 
-                bl.setPower(diagonalStrafePower);
+                bl.setPower(diagonalStrafePower * driveTrainScalar);
                 fl.setPower(0);
 
                 br.setPower(0);
-                fr.setPower(-diagonalStrafePower);
+                fr.setPower(-diagonalStrafePower * driveTrainScalar);
 
                 // downRight
 
