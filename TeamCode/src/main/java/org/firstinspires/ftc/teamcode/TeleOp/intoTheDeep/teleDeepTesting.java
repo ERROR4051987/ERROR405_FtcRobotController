@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
 
 public class teleDeepTesting extends LinearOpMode {
@@ -23,17 +25,33 @@ public class teleDeepTesting extends LinearOpMode {
     // declare secondary motors
     private DcMotorEx wrist = null;
     private DcMotorEx elbow = null;
-    private CRServo intake = null;
+
+    // declare servos
+    private CRServo lGrip = null;
+    private CRServo rGrip = null;
 
     // declare sensors
-    private RevColorSensorV3 color = null;
+    private RevColorSensorV3 lColor = null;
+    private RevColorSensorV3 rColor = null;
 
+    // make pid
+    private PIDController ePIDF;
     private PIDController wPIDF;
-
+    // wrist pid coeffecients
     public static double p = -0.005, i = 0, d = 0.00002;
     public static double f = 0.07;
 
+    // elbow pid coefficients
+    public static double eP = 0.01, eI = 0, eD = 0.00001;
+    public static double eF = 0.02;
+
     public final double ticksInDegree = 1425.1;
+
+    enum wristSpeed {
+        SLOW,
+        NORMAL,
+        FAST
+    }
 
     @Override
     public void runOpMode() {
@@ -54,19 +72,27 @@ public class teleDeepTesting extends LinearOpMode {
         elbow = hardwareMap.get(DcMotorEx.class, "elbow");
 
         // init and set up servos
-        intake = hardwareMap.get(CRServo.class, "intake");
-
-        color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+        lGrip = hardwareMap.get(CRServo.class, "lGrip");
+        rGrip = hardwareMap.get(CRServo.class, "rGrip");
 
         // change properties of the wrist & elbow motor
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        lColor = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+        rColor = hardwareMap.get(RevColorSensorV3.class, "colorRight");
+
+        lColor.initialize();
+        rColor.initialize();
+
+        lColor.enableLed(false);
+        rColor.enableLed(false);
+
+        // make pidf vontrollers
+        ePIDF = new PIDController(eP, eI, eD);
         wPIDF = new PIDController(p, i, d);
 
         // declare variables (mutable)
@@ -75,34 +101,45 @@ public class teleDeepTesting extends LinearOpMode {
         double leftStrafe;
         double rightStrafe;
         int wristPower = 0;
+        int elbowPower = 0;
         double target = 0;
+        double eTarget = 0;
         double power = 0;
+        double elbowPidPower = 0;
         double poop = 0;
+        double lGripSpeed;
+        double rGripSpeed;
         String twinTowerMode = "unlocked";
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.5;
-        final double intakePower = 1.0;
-        final double elbowVel = 1500;
-        final double wristVel = 500;
-        final int pidWristFast = 70;
-        final int pidWristSlow = 20;
+        final int pidWristFast = 95;
+        final int pidWristNormal = 70;
+        final int pidWristSlow = 15;
+        final int pidElbowFast = 70;
+        final int pidElbowNormal = 90;
+        final int pidElbowSlow = 20;
         final double driveTrainScalar = 0.85;
 
         int pos;
-
-        color.initialize();
+        int ePos;
 
         waitForStart();
 
         while (opModeIsActive()) {
 
+            // p2 button booleans
+            boolean hangerMode = gamepad2.a && gamepad2.b && gamepad2.x && gamepad2.y;
+            boolean slowWristMode = gamepad2.y;
+            boolean fastWristMode = gamepad2.x;
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
             rightPower = -gamepad1.right_stick_y;
             leftStrafe = gamepad1.left_trigger;
             rightStrafe = gamepad1.right_trigger;
+            lGripSpeed = gamepad2.left_stick_y;
+            rGripSpeed = -gamepad2.right_stick_y;
 
             bl.setPower(leftPower * driveTrainScalar);
             fl.setPower(leftPower * driveTrainScalar);
@@ -148,7 +185,6 @@ public class teleDeepTesting extends LinearOpMode {
 
             } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
 
-
                 bl.setPower(0);
                 fl.setPower(-diagonalStrafePower * driveTrainScalar);
 
@@ -161,6 +197,7 @@ public class teleDeepTesting extends LinearOpMode {
                 bl.setPower(diagonalStrafePower * driveTrainScalar);
                 fl.setPower(0);
 
+
                 br.setPower(0);
                 fr.setPower(-diagonalStrafePower * driveTrainScalar);
 
@@ -168,64 +205,70 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            if (gamepad2.left_bumper) {
-                elbow.setVelocity(elbowVel);
-            } else if (gamepad2.right_bumper) {
-                elbow.setVelocity(-elbowVel);
-            } else {
-                elbow.setVelocity(0);
+            lGrip.setPower(lGripSpeed);
+            rGrip.setPower(rGripSpeed);
+
+            if (hangerMode) {
+
+                lColor.getDistance(DistanceUnit.CM);
+                rColor.getDistance(DistanceUnit.CM);
+                telemetry.addData("hanging", hangerMode);
+                telemetry.addData("lColor", lColor.getDistance(DistanceUnit.CM));
+                telemetry.addData("rColor", rColor.getDistance(DistanceUnit.CM));
+                telemetry.update();
+            }
+//
+
+            // p2 pid enums are used for a switch. this changes the speed used for the pid
+            wristSpeed currentWristSpeed = null;
+            if ((gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) && slowWristMode && !fastWristMode) {
+
+                currentWristSpeed = wristSpeed.SLOW;
+
+            } else if ((gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) && !slowWristMode && !fastWristMode) {
+
+                currentWristSpeed = wristSpeed.NORMAL;
+
+            } else if ((gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) && !slowWristMode && fastWristMode) {
+
+                currentWristSpeed = wristSpeed.FAST;
+
             }
 
-//            if (gamepad2.dpad_up) {
-//                wPIDF.setPID(p, i, d);
-//                pos = wrist.getCurrentPosition();
-//                int target = pos;
-//                double pid = wPIDF.calculate(pos, target);
-//                double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-//                double power = pid + ff;
-//                wrist.setPower(power);
-//
-//            } else {
-////                wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-////                if (gamepad2.left_trigger > 0) {
-////                    wrist.setVelocity(wristVel);
-////                } else if (gamepad2.right_trigger > 0) {
-////                    wrist.setVelocity(-wristVel);
-////                } else {
-////                    wrist.setPower(0);
-////                }
-//
-//            }
-//
-//            if (gamepad2.y) {
-//                do {
-//                    wPIDF.setPID(p, i, d);
-//                    pos = wrist.getCurrentPosition();
-//                    int target = pos;
-//                    double pid = wPIDF.calculate(pos, target);
-//                    double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-//                    double power = pid + ff;
-//                    wrist.setPower(power);
-//
-//                } while (gamepad2.y);
+            switch (currentWristSpeed) {
+                case SLOW:
+                    do {
+                        wPIDF.setPID(p, i, d);
+                        pos = wrist.getCurrentPosition();
 
-            // when p2 'y' is held, pid wrist will move at the slow constant speed
-            if (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && gamepad2.y) {
-                do {
+                        if (gamepad2.right_trigger != 0) {
+                            wristPower = pidWristSlow;
+                        } else if (gamepad2.left_trigger != 0) {
+                            wristPower = -pidWristSlow;
+                        } else {
+                            wristPower = 0;
+                        }
+
+                        if (wristPower != 0) {
+                            target = wristPower + pos;
+                            double pid = wPIDF.calculate(pos, target);
+                            double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+                            power = pid + ff;
+                            wrist.setPower(power);
+                        }
+
+                    } while (currentWristSpeed == wristSpeed.SLOW);
+                    break;
+
+                case NORMAL:
+                    do {
                     wPIDF.setPID(p, i, d);
                     pos = wrist.getCurrentPosition();
 
-                    telemetry.addData("poop", poop);
-                    telemetry.addData("pos", pos);
-                    telemetry.addData("wristPower", wristPower);
-                    telemetry.addData("target", target);
-                    telemetry.addData("pidPower", power);
-                    telemetry.update();
-
                     if (gamepad2.right_trigger != 0) {
-                        wristPower = pidWristSlow;
+                        wristPower = pidWristNormal;
                     } else if (gamepad2.left_trigger != 0) {
-                        wristPower = -pidWristSlow;
+                        wristPower = -pidWristNormal;
                     } else {
                         wristPower = 0;
                     }
@@ -241,20 +284,13 @@ public class teleDeepTesting extends LinearOpMode {
                     double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
                     power = pid + ff;
                     wrist.setPower(power);
-                } while (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && gamepad2.y);
+                } while (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && !gamepad2.y);
 
-                // when p2 'y' is not held, pid wrist will move at the fast constant speed
-            } else if (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && !gamepad2.y) {
-                do {
+                    break;
+                case FAST:
+                    do {
                     wPIDF.setPID(p, i, d);
                     pos = wrist.getCurrentPosition();
-
-                    telemetry.addData("poop", poop);
-                    telemetry.addData("pos", pos);
-                    telemetry.addData("wristPower", wristPower);
-                    telemetry.addData("target", target);
-                    telemetry.addData("pidPower", power);
-                    telemetry.update();
 
                     if (gamepad2.right_trigger != 0) {
                         wristPower = pidWristFast;
@@ -277,49 +313,168 @@ public class teleDeepTesting extends LinearOpMode {
                     wrist.setPower(power);
                 } while (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && !gamepad2.y);
             }
-
-                // elbow code
-                switch (twinTowerMode) {
-
-                    case "unlocked":
-                        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                        break;
-
-                    case "locked":
-                        elbow.setVelocityPIDFCoefficients(100, 5, 2, 0);
-                        pos = elbow.getCurrentPosition();
-                        elbow.setTargetPosition(pos);
-                        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        elbow.setVelocity(5000);
-                        break;
-
-                }
-                // intake code
-                if (gamepad2.a) {
-                    intake.setPower(-intakePower);
-
-                } else if (gamepad2.b) {
-                    intake.setPower(intakePower);
-
-                } else {
-                    intake.setPower(0);
-                }
-
-
-                if (gamepad2.dpad_left) {
-                    do {
-                        twinTowerMode = "locked";
-
-                    } while (gamepad2.dpad_left);
-
-                } else if (gamepad2.dpad_right) {
-                    do {
-                        twinTowerMode = "unlocked";
-
-                    } while (gamepad2.dpad_right);
-                }
-
-            }
         }
-    }
+//            // when p2 'y' is held, pid wrist will move at the slow constant speed
+//            if (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && slowWristMode) {
+//                do {
+//                    wPIDF.setPID(p, i, d);
+//                    pos = wrist.getCurrentPosition();
+//
+//                    telemetry.addData("poop", poop);
+//                    telemetry.addData("pos", pos);
+//                    telemetry.addData("wristPower", wristPower);
+//                    telemetry.addData("target", target);
+//                    telemetry.addData("pidPower", power);
+//                    telemetry.update();
+//
+//                    if (gamepad2.right_trigger != 0) {
+//                        wristPower = pidWristSlow;
+//                    } else if (gamepad2.left_trigger != 0) {
+//                        wristPower = -pidWristSlow;
+//                    } else {
+//                        wristPower = 0;
+//                    }
+//
+//                    if (wristPower != 0) {
+//                        target = wristPower + pos;
+//                        double pid = wPIDF.calculate(pos, target);
+//                        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+//                        power = pid + ff;
+//                        wrist.setPower(power);
+//                    }
+//                    double pid = wPIDF.calculate(pos, target);
+//                    double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+//                    power = pid + ff;
+//                    wrist.setPower(power);
+//                } while (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && gamepad2.y);
+//
+//                // when p2 'y' is not held, pid wrist will move at the fast constant speed
+//            } else if (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && !gamepad2.y) {
+//                do {
+//                    wPIDF.setPID(p, i, d);
+//                    pos = wrist.getCurrentPosition();
+//
+//                    telemetry.addData("poop", poop);
+//                    telemetry.addData("pos", pos);
+//                    telemetry.addData("wristPower", wristPower);
+//                    telemetry.addData("target", target);
+//                    telemetry.addData("pidPower", power);
+//                    telemetry.update();
+//
+//                    if (gamepad2.right_trigger != 0) {
+//                        wristPower = pidWristFast;
+//                    } else if (gamepad2.left_trigger != 0) {
+//                        wristPower = -pidWristFast;
+//                    } else {
+//                        wristPower = 0;
+//                    }
+//
+//                    if (wristPower != 0) {
+//                        target = wristPower + pos;
+//                        double pid = wPIDF.calculate(pos, target);
+//                        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+//                        power = pid + ff;
+//                        wrist.setPower(power);
+//                    }
+//                    double pid = wPIDF.calculate(pos, target);
+//                    double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+//                    power = pid + ff;
+//                    wrist.setPower(power);
+//                } while (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0 && !gamepad2.y);
+//            }
+//
+//            // when p2 'y' is held and 'x' is not held, pid elbow will move at the slow constant speed
+//            if (p2LB || p2LB && p2Y && !p2X) {
+//                do {
+//                    ePIDF.setPID(eP, eI, eD);
+//                    ePos = elbow.getCurrentPosition();
+//
+//                    if (p2LB) {
+//                        elbowPower = -pidElbowSlow;
+//                    } else if (p2LB) {
+//                        elbowPower = pidElbowSlow;
+//                    } else {
+//                        elbowPower = 0;
+//                    }
+//
+//                    if (elbowPower != 0) {
+//                        eTarget = elbowPower + ePos;
+//                        double ePid = ePIDF.calculate(ePos, eTarget);
+//                        double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                        elbowPidPower = ePid + eFf;
+//                        elbow.setPower(elbowPidPower);
+//                    }
+//
+//                    eTarget = elbowPower + ePos;
+//                    double ePid = ePIDF.calculate(ePos, eTarget);
+//                    double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                    elbowPidPower = ePid + eFf;
+//                    elbow.setPower(elbowPidPower);
+//
+//                } while (p2LB || p2LB && p2Y && !p2X);
+//
+//                // when p2 'y' and 'x' is not held, pid elbow will move at the normal constant speed
+//            } else if (p2LB || p2LB && !p2Y && !p2X) {
+//                do {
+//                    ePIDF.setPID(eP, eI, eD);
+//                    ePos = elbow.getCurrentPosition();
+//
+//                    if (p2LB) {
+//                        elbowPower = -pidElbowNormal;
+//                    } else if (p2LB) {
+//                        elbowPower = pidElbowNormal;
+//                    } else {
+//                        elbowPower = 0;
+//                    }
+//
+//                    if (elbowPower != 0) {
+//                        eTarget = elbowPower + ePos;
+//                        double ePid = ePIDF.calculate(ePos, eTarget);
+//                        double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                        elbowPidPower = ePid + eFf;
+//                        elbow.setPower(elbowPidPower);
+//                    }
+//
+//                    eTarget = elbowPower + ePos;
+//                    double ePid = ePIDF.calculate(ePos, eTarget);
+//                    double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                    elbowPidPower = ePid + eFf;
+//                    elbow.setPower(elbowPidPower);
+//
+//                } while (p2LB || p2LB && !p2Y && !p2X);
+//
+//                // when p2 'x' is held and 'y' is not held, pid elbow will move at the fast constant speed
+//            } else if (p2LB || p2LB && !p2Y && p2X) {
+//                do {
+//                    ePIDF.setPID(eP, eI, eD);
+//                    ePos = elbow.getCurrentPosition();
+//
+//                    if (p2LB) {
+//                        elbowPower = -pidElbowFast;
+//                    } else if (p2LB) {
+//                        elbowPower = pidElbowFast;
+//                    } else {
+//                        elbowPower = 0;
+//                    }
+//
+//                    if (elbowPower != 0) {
+//                        eTarget = elbowPower + ePos;
+//                        double ePid = ePIDF.calculate(ePos, eTarget);
+//                        double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                        elbowPidPower = ePid + eFf;
+//                        elbow.setPower(elbowPidPower);
+//                    }
+//
+//                    eTarget = elbowPower + ePos;
+//                    double ePid = ePIDF.calculate(ePos, eTarget);
+//                    double eFf = Math.cos(Math.toRadians(eTarget / ticksInDegree)) * eF;
+//                    elbowPidPower = ePid + eFf;
+//                    elbow.setPower(elbowPidPower);
+//
+//                } while (p2LB || p2RB && !p2Y && p2X);
+        }
+        }
+
+
+//}
+
