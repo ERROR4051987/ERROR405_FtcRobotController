@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.BL;
+package org.firstinspires.ftc.teamcode.Auto.RL;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
-public class BLNormal extends LinearOpMode {
+@Autonomous (name= "RLNormal", group= "autoRL", preselectTeleOp = "teleDeep")
+public class RLNormal extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotorEx bl = null;
@@ -84,7 +84,7 @@ public class BLNormal extends LinearOpMode {
 
             posForward(400, 200);
 
-            posStrafeRight(700, 3500);
+            posStrafeLeft(700, 2000);
 
             requestOpModeStop();
         }
@@ -289,7 +289,7 @@ public class BLNormal extends LinearOpMode {
 
 
     }
-    
+
     private void stop(double time) {
 
         bl.setPower(0);
@@ -350,6 +350,6 @@ public class BLNormal extends LinearOpMode {
     }
 
     private void hangPreloadSpecimen () {
-        
+
     }
 }

@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class telemetry extends OpMode {
 
     private DcMotorEx elbow = null;
+    private DcMotorEx wrist = null;
 
     // make funny pid
     private PIDController controller;
@@ -34,8 +35,10 @@ public class telemetry extends OpMode {
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
+        elbow = hardwareMap.get(DcMotorEx.class, "wrist");
         elbow.setDirection(DcMotorSimple.Direction.REVERSE);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
