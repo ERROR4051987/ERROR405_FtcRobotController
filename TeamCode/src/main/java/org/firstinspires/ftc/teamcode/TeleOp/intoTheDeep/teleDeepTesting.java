@@ -19,94 +19,52 @@ public class teleDeepTesting extends LinearOpMode {
     private DcMotor fr = null;
 
     // declare secondary motors
-    private DcMotorEx wrist = null;
-    private DcMotorEx elbow = null;
+    private DcMotorEx slide = null;
+    private DcMotorEx arm = null;
 
-    private CRServo lGrip = null;
-    private CRServo rGrip = null;
+    // declare servos
+    private CRServo lWrist = null;
+    private CRServo rWrist = null;
 
     // declare sensors
     private RevColorSensorV3 color = null;
 
-    private PIDController wPIDF;
-    private PIDController ePIDF;
-
-    public static double wP = -0.005, wI = 0, wD = 0.00002;
-    public static double wF = 0.07;
-
-    // elbow pid coefficients
-    public static double eP = 0.01, eI = 0, eD = 0.00001;
-    public static double eF = 0.02;
-
-    public final double ticksInDegree = 1425.1;
-
     @Override
     public void runOpMode() {
 
-        // init and set up drivetrain motors
+        // init and set up motors
         bl = hardwareMap.get(DcMotor.class, "backLeft");
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
+        slide = hardwareMap.get(DcMotorEx.class, "slide");
+        arm = hardwareMap.get(DcMotorEx.class, "arm");
 
+        // customize motor zero power behavior
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // init and set up secondary motors
-        wrist = hardwareMap.get(DcMotorEx.class, "wrist");
-        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
-
-        // init and set up servos
-        lGrip = hardwareMap.get(CRServo.class, "lGrip");
-        rGrip = hardwareMap.get(CRServo.class, "rGrip");
+        // customize motor modes
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
-
-        // change properties of the wrist & elbow motor
-        wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        wPIDF = new PIDController(wP, wI, wD);
-        ePIDF = new PIDController(eP, eI, eD);
 
         // declare variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
-        int wristPower = 0;
-        int elbowPower = 0;
-        double wristTarget = 0;
-        double elbowTarget = 0;
-        double wristPidPower = 0;
-        double elbowPidPower = 0;
-        double poop = 0;
-        String twinTowerMode = "unlocked";
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
         final double strafeScalar = 0.95;
 
-        final double elbowVel = 1000;
-        final double wristVel = 0.3;
-
-        final int pidWristSlow = 15;
-        final int pidWristNormal = 40;
-        final int pidWristFast = 80;
-
-        final int pidElbowSlow = 15;
-        final int pidElbowFast = 80;
-
         final double driveTrainScalar = 0.85;
-
-        int elbowPos;
 
         color.initialize();
 
@@ -184,29 +142,10 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            lGrip.setPower(gamepad2.left_stick_y);
-            rGrip.setPower(-gamepad2.right_stick_y);
-
-
-            if (gamepad2.right_bumper) {
-                elbow.setVelocity(elbowVel);
-            } else if (gamepad2.left_bumper) {
-                elbow.setVelocity(-elbowVel);
-            } else {
-                elbow.setPower(0);
-            }
-
-            if (gamepad2.right_trigger > 0) {
-                wrist.setPower(-wristVel);
-            } else if (gamepad2.left_trigger > 0) {
-                wrist.setPower(wristVel);
-            } else {
-                wrist.setPower(0);
-
             }
         }
 
     }
-}
+
 
 

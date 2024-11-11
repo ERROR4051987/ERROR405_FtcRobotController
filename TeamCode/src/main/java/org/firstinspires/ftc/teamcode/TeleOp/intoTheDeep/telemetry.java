@@ -16,8 +16,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class telemetry extends OpMode {
 
-    private DcMotorEx elbow = null;
-    private DcMotorEx wrist = null;
+//    private DcMotorEx elbow = null;
+//    private DcMotorEx  = null;
 
     // make funny pid
     private PIDController controller;
@@ -35,26 +35,26 @@ public class telemetry extends OpMode {
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        elbow = hardwareMap.get(DcMotorEx.class, "wrist");
-        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        elbow = hardwareMap.get(DcMotorEx.class, "");
+//        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
+//        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void loop() {
-        controller.setPID(p, i, d);
-        int elbowPos = elbow.getCurrentPosition();
-        double pid = controller.calculate(elbowPos, target);
-        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-
-        double power = pid + ff;
-
-        elbow.setPower(power);
-
-        telemetry.addData("pos", elbowPos);
-        telemetry.addData("target", target);
-        telemetry.update();
+//        controller.setPID(p, i, d);
+//        int elbowPos = elbow.getCurrentPosition();
+//        double pid = controller.calculate(elbowPos, target);
+//        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+//
+//        double power = pid + ff;
+//
+//        elbow.setPower(power);
+//
+//        telemetry.addData("pos", elbowPos);
+//        telemetry.addData("target", target);
+//        telemetry.update();
     }
 }
 

@@ -19,13 +19,6 @@ public class BLNormal extends LinearOpMode {
     private DcMotorEx fl = null;
     private DcMotorEx fr = null;
 
-    // declare secondary motors
-    private DcMotorEx wrist = null;
-    private DcMotorEx elbow = null;
-
-    // declare servos
-    private CRServo intake = null;
-
     // declare sensors
     private RevColorSensorV3 colorLeft = null;
 
@@ -50,29 +43,11 @@ public class BLNormal extends LinearOpMode {
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // init and set up secondary motors
-        wrist = hardwareMap.get(DcMotorEx.class, "wrist");
-        elbow = hardwareMap.get(DcMotorEx.class, "elbow");
-
-        // set all secondary motors' encoders to 0
-        wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // set all secondary motors' mode to brake
-        wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        // init and set up servos
-        intake = hardwareMap.get(CRServo.class, "intake");
-
         // init and set up sensors
         colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         // position constants
-        final int elbowHalf = -1214;
-        final int elbowReset = 0;
-        final int wristVertical = 500;
-        final int wristReset = 0;
+        final int Reset = 0;
 
         //tps and speed constants
         final double brake = 0;
@@ -215,57 +190,6 @@ public class BLNormal extends LinearOpMode {
         resetMotorsAndTime();
     }
 
-    private void posElbow (double tps, int pos) {
-        elbow.setTargetPosition(pos);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setVelocity(tps);
-        while (elbow.isBusy()) {
-            idle();
-        } runtime.reset();
-        elbow.setPower(0);
-    }
-
-    private void posWrist(double tps, int pos) {
-        wrist.setTargetPosition(pos);
-        wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        wrist.setVelocity(tps);
-        while (wrist.isBusy()) {
-            idle();
-        } runtime.reset();
-        wrist.setPower(0);
-    }
-
-    private void posElbowAndWrist(double elbowTps, int elbowPos,
-                                  double wristTps, int wristPos) {
-
-        elbow.setTargetPosition(elbowPos);
-        elbow.setVelocity(elbowTps);
-        wrist.setTargetPosition(wristPos);
-        wrist.setVelocity(wristTps);
-
-        while (wrist.isBusy() && elbow.isBusy()) {
-            idle();
-        } runtime.reset();
-        wrist.setPower(0);
-        elbow.setPower(0);
-    }
-
-    private void sampleSuck() {
-
-        intake.setPower(-1.0);
-        while (opModeIsActive() && (runtime.seconds() <= Math.abs(1))) {
-            idle();
-        } runtime.reset();
-    }
-
-    private void sampleSpit() {
-
-        intake.setPower(1.0);
-        while (opModeIsActive() && (runtime.seconds() <= Math.abs(3.0))) {
-            idle();
-        } runtime.reset();
-    }
-
     private void colorScan (String location) {
         switch (location) {
             case "Right":
@@ -327,25 +251,6 @@ public class BLNormal extends LinearOpMode {
     }
 
     private void unloadSampleintoBasket (String location) {
-
-    }
-
-    private void putPreloadIntoBasket (int elbowPos, int wristPos) {
-        posForward(500,400);
-        posStrafeLeft(500, 700);
-        posTurnRight(500, 500);
-        posElbow(1500, elbowPos);
-        posElbowAndWrist(1000, elbowPos * 2, 600, wristPos);
-        sampleSpit();
-    }
-
-    private void grabNeutralSamples () {
-        posWrist(500,0);
-        posElbow(200,0);
-        posForward(500, 200);
-        posTurnLeft(300, 500);
-        posForward(300, 100);
-
 
     }
 
