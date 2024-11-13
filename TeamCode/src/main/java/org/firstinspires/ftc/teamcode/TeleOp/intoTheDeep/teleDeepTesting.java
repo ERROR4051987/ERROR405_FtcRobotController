@@ -29,6 +29,8 @@ public class teleDeepTesting extends LinearOpMode {
     // declare sensors
     private RevColorSensorV3 color = null;
 
+    private PIDController controller;
+
     @Override
     public void runOpMode() {
 
@@ -50,9 +52,12 @@ public class teleDeepTesting extends LinearOpMode {
 
         // customize motor modes
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+
+        lWrist = hardwareMap.get(CRServo.class, "lWrist");
+        rWrist = hardwareMap.get(CRServo.class, "rWrist");
+
 
         // declare variables (mutable)
         double leftPower;
@@ -142,7 +147,45 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
+            armPID();
+
+            if (gamepad2.dpad_up) {
+                lWrist.setPower(1.0);
+            } else if (gamepad2.dpad_down) {
+                lWrist.setPower(-1.0);
+            } else {
+                lWrist.setPower(0);
             }
+
+        }
+
+    }
+
+        private void armPID() {
+            double p = 0, i = 0, d = 0;
+            double f = 0;
+
+            int target = 0;
+            final double ticksInDegree = 1425.1;
+            controller = new PIDController(p, i, d);
+            int posPower = 0;
+
+            if (gamepad2.right_bumper) {
+                posPower = 30;
+            } else if (gamepad2.left_bumper) {
+                posPower = -30;
+            } else {
+                posPower = 0;
+            }
+
+            controller.setPID(p, i, d);
+            int armPos = arm.getCurrentPosition();
+            double pid = controller.calculate(armPos, target);
+            double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+
+            double power = pid + ff;
+
+            arm.setPower(power);
         }
 
     }
