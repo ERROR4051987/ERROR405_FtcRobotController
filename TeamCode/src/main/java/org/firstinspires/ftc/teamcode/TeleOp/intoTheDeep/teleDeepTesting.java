@@ -23,8 +23,7 @@ public class teleDeepTesting extends LinearOpMode {
     private DcMotorEx arm = null;
 
     // declare servos
-    private CRServo lWrist = null;
-    private CRServo rWrist = null;
+    private CRServo intake = null;
 
     // declare sensors
     private RevColorSensorV3 color = null;
@@ -52,14 +51,14 @@ public class teleDeepTesting extends LinearOpMode {
 
         // customize motor modes
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
-        lWrist = hardwareMap.get(CRServo.class, "lWrist");
-        rWrist = hardwareMap.get(CRServo.class, "rWrist");
+        intake = hardwareMap.get(CRServo.class, "intake");
 
-
-        // declare variables (mutable)
+        // declare speed variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
@@ -68,15 +67,17 @@ public class teleDeepTesting extends LinearOpMode {
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
         final double strafeScalar = 0.95;
-
         final double driveTrainScalar = 0.85;
+        final double slideVelocity = 1000;
+        final double intakePower = 1.0;
 
         color.initialize();
 
         waitForStart();
 
         while (opModeIsActive()) {
-
+            telemetry.addData("speed", slide.getVelocity());
+            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -150,11 +151,19 @@ public class teleDeepTesting extends LinearOpMode {
             armPID();
 
             if (gamepad2.dpad_up) {
-                lWrist.setPower(1.0);
+                intake.setPower(intakePower);
             } else if (gamepad2.dpad_down) {
-                lWrist.setPower(-1.0);
+                intake.setPower(-intakePower);
             } else {
-                lWrist.setPower(0);
+                intake.setPower(0);
+            }
+
+            if (gamepad2.right_bumper) {
+                slide.setVelocity(-slideVelocity);
+            } else if (gamepad2.left_bumper) {
+                slide.setVelocity(slideVelocity);
+            } else {
+                slide.setPower(0);
             }
 
         }
@@ -165,14 +174,13 @@ public class teleDeepTesting extends LinearOpMode {
             double p = 0, i = 0, d = 0;
             double f = 0;
 
-            int target = 0;
             final double ticksInDegree = 1425.1;
             controller = new PIDController(p, i, d);
             int posPower = 0;
 
-            if (gamepad2.right_bumper) {
+            if (gamepad2.right_trigger > 0) {
                 posPower = 30;
-            } else if (gamepad2.left_bumper) {
+            } else if (gamepad2.left_trigger > 0) {
                 posPower = -30;
             } else {
                 posPower = 0;
@@ -180,6 +188,7 @@ public class teleDeepTesting extends LinearOpMode {
 
             controller.setPID(p, i, d);
             int armPos = arm.getCurrentPosition();
+            int target = armPos + posPower;
             double pid = controller.calculate(armPos, target);
             double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
 
