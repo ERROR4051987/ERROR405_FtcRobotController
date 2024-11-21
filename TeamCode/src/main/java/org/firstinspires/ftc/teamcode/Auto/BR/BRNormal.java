@@ -66,9 +66,12 @@ public class BRNormal extends LinearOpMode {
 
         while(opModeIsActive()) {
 
-            posForward(400, 200);
+            posReverse(400, 200);
 
-            posStrafeRight(700, 2000);
+            posStrafeLeft(700, 2000);
+
+            intake.setPower(1.0);
+            sleep(3000);
 
             requestOpModeStop();
         }

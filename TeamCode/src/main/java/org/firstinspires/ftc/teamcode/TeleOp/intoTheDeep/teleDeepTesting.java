@@ -24,6 +24,7 @@ public class teleDeepTesting extends LinearOpMode {
 
     // declare servos
     private CRServo intake = null;
+    private CRServo wrist = null;
 
     // declare sensors
     private RevColorSensorV3 color = null;
@@ -47,22 +48,25 @@ public class teleDeepTesting extends LinearOpMode {
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // customize motor modes
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         intake = hardwareMap.get(CRServo.class, "intake");
+        wrist = hardwareMap.get(CRServo.class, "wrist");
+
 
         // declare speed variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
+        double wristPower;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
@@ -84,6 +88,8 @@ public class teleDeepTesting extends LinearOpMode {
             rightPower = -gamepad1.right_stick_y;
             leftStrafe = gamepad1.left_trigger;
             rightStrafe = gamepad1.right_trigger;
+
+            wristPower = gamepad2.right_stick_y;
 
             bl.setPower(leftPower * driveTrainScalar);
             fl.setPower(leftPower * driveTrainScalar);
@@ -129,7 +135,7 @@ public class teleDeepTesting extends LinearOpMode {
 
             } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
 
-
+//skibidi
                 bl.setPower(0);
                 fl.setPower(-diagonalStrafePower);
 
@@ -148,7 +154,15 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            armPID();
+            wrist.setPower(wristPower);
+
+            if (gamepad2.right_trigger > 0) {
+                arm.setPower(gamepad2.right_trigger);
+            } else if (gamepad2.left_trigger > 0) {
+                arm.setPower(-gamepad2.left_trigger);
+            } else {
+                arm.setPower(0);
+            }
 
             if (gamepad2.dpad_up) {
                 intake.setPower(intakePower);
@@ -166,38 +180,32 @@ public class teleDeepTesting extends LinearOpMode {
                 slide.setPower(0);
             }
 
-        }
+//jonah snuck into the code
+            if (!gamepad2.a) {
+                    double p = 0.01, i = 0, d = 0;
+                    double f = 0.1;
 
-    }
+                    final double ticksInDegree = 537.7;
+                    controller = new PIDController(p, i, d);
 
-        private void armPID() {
-            double p = 0, i = 0, d = 0;
-            double f = 0;
+                    controller.setPID(p, i, d);
+                    int armPos = arm.getCurrentPosition();
+                    int target = armPos += (gamepad2.left_stick_y * 20);
 
-            final double ticksInDegree = 1425.1;
-            controller = new PIDController(p, i, d);
-            int posPower = 0;
+                    double pid = controller.calculate(armPos, target);
+                    double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
 
-            if (gamepad2.right_trigger > 0) {
-                posPower = 30;
-            } else if (gamepad2.left_trigger > 0) {
-                posPower = -30;
-            } else {
-                posPower = 0;
+                    double power = pid + ff;
+
+                    arm.setPower(power);
+                    telemetry.addData("TARGET", target);
+                    telemetry.update();
+
             }
-
-            controller.setPID(p, i, d);
-            int armPos = arm.getCurrentPosition();
-            int target = armPos + posPower;
-            double pid = controller.calculate(armPos, target);
-            double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-
-            double power = pid + ff;
-
-            arm.setPower(power);
         }
-
     }
+
+}
 
 
 

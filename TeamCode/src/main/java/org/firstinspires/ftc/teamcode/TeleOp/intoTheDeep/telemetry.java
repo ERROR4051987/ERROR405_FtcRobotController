@@ -16,8 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class telemetry extends OpMode {
 
-//    private DcMotorEx elbow = null;
-//    private DcMotorEx  = null;
+    private DcMotorEx arm = null;
 
     // make funny pid
     private PIDController controller;
@@ -27,34 +26,33 @@ public class telemetry extends OpMode {
     public static double f = 0;
 
     public static int target = 0;
-    // TODO: change ticks to actual ticks
-    public final double ticksInDegree = 1425.1;
+    public final double ticksInDegree = 537.7;
 
     @Override
     public void init() {
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-//        elbow = hardwareMap.get(DcMotorEx.class, "");
-//        elbow.setDirection(DcMotorSimple.Direction.REVERSE);
-//        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        elbow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm = hardwareMap.get(DcMotorEx.class, "arm");
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void loop() {
-//        controller.setPID(p, i, d);
-//        int elbowPos = elbow.getCurrentPosition();
-//        double pid = controller.calculate(elbowPos, target);
-//        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-//
-//        double power = pid + ff;
-//
-//        elbow.setPower(power);
-//
-//        telemetry.addData("pos", elbowPos);
-//        telemetry.addData("target", target);
-//        telemetry.update();
+        controller.setPID(p, i, d);
+        int armPos = arm.getCurrentPosition();
+        double pid = controller.calculate(armPos, target);
+        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
+
+        double power = pid + ff;
+
+        arm.setPower(power);
+
+        telemetry.addData("pos", armPos);
+        telemetry.addData("target", target);
+        telemetry.addData("on?", arm.isMotorEnabled());
+        telemetry.update();
     }
 }
 
