@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
@@ -19,8 +18,8 @@ public class BLNormal extends LinearOpMode {
     private DcMotorEx fl = null;
     private DcMotorEx fr = null;
 
-    // declare sensors
-    private RevColorSensorV3 colorLeft = null;
+    // declare servos
+    private CRServo intake = null;
 
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
@@ -43,10 +42,14 @@ public class BLNormal extends LinearOpMode {
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // init and set up sensors
-        colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
+        // init and set up servos
+        intake = hardwareMap.get(CRServo.class, "intake");
+
 
         // position constants
+        final int elbowHalf = -1214;
+        final int elbowReset = 0;
+        final int Vertical = 500;
         final int Reset = 0;
 
         //tps and speed constants
@@ -59,7 +62,10 @@ public class BLNormal extends LinearOpMode {
 
             posForward(400, 200);
 
-            posStrafeRight(700, 3500);
+            posStrafeRight(700, 2000);
+
+            intake.setPower(1.0);
+            sleep(3000);
 
             requestOpModeStop();
         }
@@ -190,30 +196,26 @@ public class BLNormal extends LinearOpMode {
         resetMotorsAndTime();
     }
 
+    private void sampleSuck() {
+
+        intake.setPower(-1.0);
+        while (opModeIsActive() && (runtime.seconds() <= Math.abs(1))) {
+            idle();
+        } runtime.reset();
+    }
+
+    private void sampleSpit() {
+
+        intake.setPower(1.0);
+        while (opModeIsActive() && (runtime.seconds() <= Math.abs(3.0))) {
+            idle();
+        } runtime.reset();
+    }
+
     private void colorScan (String location) {
-        switch (location) {
-            case "Right":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-
-            case "Middle":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-
-            case "Left":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-        }
-
 
     }
-    
+
     private void stop(double time) {
 
         bl.setPower(0);
@@ -255,6 +257,6 @@ public class BLNormal extends LinearOpMode {
     }
 
     private void hangPreloadSpecimen () {
-        
+
     }
 }

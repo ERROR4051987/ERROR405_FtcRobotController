@@ -22,9 +22,6 @@ public class BRNormal extends LinearOpMode {
     // declare servos
     private CRServo intake = null;
 
-    // declare sensors
-    private RevColorSensorV3 colorLeft = null;
-
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -49,8 +46,6 @@ public class BRNormal extends LinearOpMode {
         // init and set up servos
         intake = hardwareMap.get(CRServo.class, "intake");
 
-        // init and set up sensors
-        colorLeft = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
 
         // position constants
         final int elbowHalf = -1214;
@@ -66,9 +61,9 @@ public class BRNormal extends LinearOpMode {
 
         while(opModeIsActive()) {
 
-            posReverse(400, 200);
+            posForward(400, 200);
 
-            posStrafeLeft(700, 2000);
+            posStrafeRight(700, 2000);
 
             intake.setPower(1.0);
             sleep(3000);
@@ -219,25 +214,6 @@ public class BRNormal extends LinearOpMode {
     }
 
     private void colorScan (String location) {
-        switch (location) {
-            case "Right":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-
-            case "Middle":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-
-            case "Left":
-                if (colorLeft.red() > colorLeft.blue() && colorLeft.red() > colorLeft.green()) {
-
-                }
-                break;
-        }
 
 
     }

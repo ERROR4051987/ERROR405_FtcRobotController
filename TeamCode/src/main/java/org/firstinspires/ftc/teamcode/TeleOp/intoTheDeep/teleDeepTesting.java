@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
 
@@ -19,13 +20,11 @@ public class teleDeepTesting extends LinearOpMode {
     private DcMotor fr = null;
 
     // declare secondary motors
-    private DcMotorEx slide = null;
-    private DcMotorEx arm = null;
+    private DcMotorEx lHanger = null;
+    private DcMotorEx rHanger = null;
+    private DcMotorEx lift = null;
 
     // declare servos
-    private CRServo intake = null;
-    private CRServo lwrist = null;
-    private CRServo rwrist = null;
     private PIDController controller;
 
     @Override
@@ -36,48 +35,49 @@ public class teleDeepTesting extends LinearOpMode {
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
-        slide = hardwareMap.get(DcMotorEx.class, "slide");
-        arm = hardwareMap.get(DcMotorEx.class, "arm");
+        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        lHanger = hardwareMap.get(DcMotorEx.class, "leftHanger");
+        rHanger = hardwareMap.get(DcMotorEx.class, "rightHanger");
 
         // customize motor zero power behavior
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rHanger.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // customize motor modes
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        intake = hardwareMap.get(CRServo.class, "intake");
-        lwrist = hardwareMap.get(CRServo.class, "lWrist");
-        rwrist = hardwareMap.get(CRServo.class, "rWrist");
-
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // declare speed variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
-        double lWristPower;
-        double rWristPower;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
         final double strafeScalar = 0.95;
         final double driveTrainScalar = 0.85;
-        final double slideVelocity = 1000;
-        final double intakePower = 1.0;
+
+        // declare position constants
+        final int hangMax = 8000;
+        final int hangMaxSpeed = 4500;
+        final int hangMin = 100;
+        final int hangMinSpeed = 4000;
 
         //carter quit looking at this
         waitForStart();
 
         while (opModeIsActive()) {
-            telemetry.addData("speed", slide.getVelocity());
-            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -85,8 +85,9 @@ public class teleDeepTesting extends LinearOpMode {
             leftStrafe = gamepad1.left_trigger;
             rightStrafe = gamepad1.right_trigger;
 
-            lWristPower = gamepad2.right_stick_y;
-            rWristPower = -gamepad2.right_stick_y;
+            // player 2 booleans
+            boolean hangReady = gamepad2.a && !gamepad2.x;
+            boolean hang = gamepad2.a && gamepad2.x;
 
             bl.setPower(leftPower * driveTrainScalar);
             fl.setPower(leftPower * driveTrainScalar);
@@ -151,54 +152,24 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            lwrist.setPower(lWristPower);
-            rwrist.setPower(lWristPower);
-
-            if (gamepad2.right_trigger > 0) {
-                arm.setPower(gamepad2.right_trigger);
-            } else if (gamepad2.left_trigger > 0) {
-                arm.setPower(-gamepad2.left_trigger);
+            if (hangReady) {
+                lHanger.setTargetPosition(hangMax);
+                lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lHanger.setVelocity(hangMaxSpeed);
+                rHanger.setTargetPosition(hangMax);
+                rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rHanger.setVelocity(hangMaxSpeed);
+            } else if (hang) {
+                lHanger.setTargetPosition(hangMin);
+                lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lHanger.setVelocity(hangMinSpeed);
+                rHanger.setTargetPosition(hangMin);
+                rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rHanger.setVelocity(hangMinSpeed);
+                sleep(30000);
             } else {
-                arm.setPower(0);
-            }
-
-            if (gamepad2.dpad_up) {
-                intake.setPower(intakePower);
-            } else if (gamepad2.dpad_down) {
-                intake.setPower(-intakePower);
-            } else {
-                intake.setPower(0);
-            }
-
-            if (gamepad2.right_bumper) {
-                slide.setVelocity(-slideVelocity);
-            } else if (gamepad2.left_bumper) {
-                slide.setVelocity(slideVelocity);
-            } else {
-                slide.setPower(0);
-            }
-
-            //jonah snuck into the code
-            if (!gamepad2.a) {
-                    double p = 0.01, i = 0, d = 0;
-                    double f = 0.1;
-
-                    final double ticksInDegree = 537.7;
-                    controller = new PIDController(p, i, d);
-
-                    controller.setPID(p, i, d);
-                    int armPos = arm.getCurrentPosition();
-                    int target = armPos += (gamepad2.left_stick_y * 20);
-
-                    double pid = controller.calculate(armPos, target);
-                    double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-
-                    double power = pid + ff;
-
-                    arm.setPower(power);
-                    telemetry.addData("TARGET", target);
-                    telemetry.update();
-
+                lHanger.setPower(0);
+                rHanger.setPower(0);
             }
         }
     }

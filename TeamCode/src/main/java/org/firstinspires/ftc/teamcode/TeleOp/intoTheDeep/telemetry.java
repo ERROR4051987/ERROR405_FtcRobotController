@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class telemetry extends OpMode {
 
-    private DcMotorEx arm = null;
+    private DcMotorEx lift = null;
 
     // make funny pid
     private PIDController controller;
@@ -33,25 +33,25 @@ public class telemetry extends OpMode {
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        arm = hardwareMap.get(DcMotorEx.class, "arm");
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void loop() {
         controller.setPID(p, i, d);
-        int armPos = arm.getCurrentPosition();
-        double pid = controller.calculate(armPos, target);
+        int liftPos = lift.getCurrentPosition();
+        double pid = controller.calculate(liftPos, target);
         double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
 
         double power = pid + ff;
 
-        arm.setPower(power);
+        lift.setPower(power);
 
-        telemetry.addData("pos", armPos);
+        telemetry.addData("pos", liftPos);
         telemetry.addData("target", target);
-        telemetry.addData("on?", arm.isMotorEnabled());
+        telemetry.addData("on?", lift.isMotorEnabled());
         telemetry.update();
     }
 }
