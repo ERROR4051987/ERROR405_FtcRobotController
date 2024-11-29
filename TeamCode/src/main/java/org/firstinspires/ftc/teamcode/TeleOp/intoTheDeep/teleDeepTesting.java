@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
 
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -86,17 +84,19 @@ public class teleDeepTesting extends LinearOpMode {
             rightStrafe = gamepad1.right_trigger;
 
             // player 2 booleans
-            boolean hangReady = gamepad2.a && !gamepad2.x;
-            boolean hang = gamepad2.a && gamepad2.x;
+            boolean hangStart = gamepad2.a && !gamepad2.x;
+            boolean hanging = gamepad2.a && gamepad2.x;
 
-            bl.setPower(leftPower * driveTrainScalar);
-            fl.setPower(leftPower * driveTrainScalar);
+            if (!hanging) {
+                bl.setPower(leftPower * driveTrainScalar);
+                fl.setPower(leftPower * driveTrainScalar);
 
-            br.setPower(rightPower * driveTrainScalar);
-            fr.setPower(rightPower * driveTrainScalar);
+                br.setPower(rightPower * driveTrainScalar);
+                fr.setPower(rightPower * driveTrainScalar);
+            }
 
             // strafe left and right
-            if (gamepad1.left_trigger > 0) {
+            if (gamepad1.left_trigger > 0 && !hanging) {
 
                 bl.setPower(-leftStrafe * strafeScalar);
                 fl.setPower(leftStrafe * strafeScalar);
@@ -104,7 +104,7 @@ public class teleDeepTesting extends LinearOpMode {
                 br.setPower(-leftStrafe * strafeScalar);
                 fr.setPower(leftStrafe * strafeScalar);
 
-            } else if (gamepad1.right_trigger > 0) {
+            } else if (gamepad1.right_trigger > 0 && !hanging) {
 
                 bl.setPower(rightStrafe * strafeScalar);
                 fl.setPower(-rightStrafe * strafeScalar);
@@ -113,7 +113,7 @@ public class teleDeepTesting extends LinearOpMode {
                 fr.setPower(-rightStrafe * strafeScalar);
             }
 
-            if (gamepad1.dpad_up && gamepad1.left_bumper) {
+            if (gamepad1.dpad_up && gamepad1.left_bumper && !hanging) {
 
                 bl.setPower(-diagonalStrafePower);
                 fl.setPower(0);
@@ -122,7 +122,7 @@ public class teleDeepTesting extends LinearOpMode {
                 fr.setPower(diagonalStrafePower);
                 // upLeft
 
-            } else if (gamepad1.dpad_down && gamepad1.left_bumper) {
+            } else if (gamepad1.dpad_down && gamepad1.left_bumper && !hanging) {
 
                 bl.setPower(0);
                 fl.setPower(diagonalStrafePower);
@@ -131,7 +131,7 @@ public class teleDeepTesting extends LinearOpMode {
                 fr.setPower(0);
                 // downLeft
 
-            } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
+            } else if (gamepad1.dpad_up && gamepad1.right_bumper && !hanging) {
 
                 //skibidi
                 bl.setPower(0);
@@ -141,7 +141,7 @@ public class teleDeepTesting extends LinearOpMode {
                 fr.setPower(0);
                 // upRight
 
-            } else if (gamepad1.dpad_down && gamepad1.right_bumper) {
+            } else if (gamepad1.dpad_down && gamepad1.right_bumper && !hanging) {
 
                 bl.setPower(diagonalStrafePower);
                 fl.setPower(0);
@@ -152,14 +152,14 @@ public class teleDeepTesting extends LinearOpMode {
 
             }
 
-            if (hangReady) {
+            if (hangStart) {
                 lHanger.setTargetPosition(hangMax);
                 lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 lHanger.setVelocity(hangMaxSpeed);
                 rHanger.setTargetPosition(hangMax);
                 rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 rHanger.setVelocity(hangMaxSpeed);
-            } else if (hang) {
+            } else if (hanging) {
                 lHanger.setTargetPosition(hangMin);
                 lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 lHanger.setVelocity(hangMinSpeed);

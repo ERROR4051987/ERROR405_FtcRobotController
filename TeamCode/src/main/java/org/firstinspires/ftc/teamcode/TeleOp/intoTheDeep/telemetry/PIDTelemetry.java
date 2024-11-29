@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
+package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep.telemetry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
