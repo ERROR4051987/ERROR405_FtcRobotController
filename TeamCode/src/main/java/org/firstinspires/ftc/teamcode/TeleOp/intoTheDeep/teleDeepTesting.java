@@ -6,11 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
 
 public class teleDeepTesting extends LinearOpMode {
-// ni-ce kool aid person
+    // ni-ce kool aid person
     // declare drivetrain motors
     private DcMotor bl = null;
     private DcMotor br = null;
@@ -21,8 +22,12 @@ public class teleDeepTesting extends LinearOpMode {
     private DcMotorEx lHanger = null;
     private DcMotorEx rHanger = null;
     private DcMotorEx lift = null;
+    private DcMotorEx arm = null;
 
     // declare servos
+    private Servo lGripper = null;
+    private Servo rGripper = null;
+
     private PIDController controller;
 
     @Override
@@ -34,8 +39,13 @@ public class teleDeepTesting extends LinearOpMode {
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
         lift = hardwareMap.get(DcMotorEx.class, "lift");
+        arm = hardwareMap.get(DcMotorEx.class, "arm");
         lHanger = hardwareMap.get(DcMotorEx.class, "leftHanger");
         rHanger = hardwareMap.get(DcMotorEx.class, "rightHanger");
+
+        // init and set up servos
+        lGripper = hardwareMap.get(Servo.class, "lGrip");
+        rGripper = hardwareMap.get(Servo.class, "rGrip");
 
         // customize motor zero power behavior
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -67,7 +77,7 @@ public class teleDeepTesting extends LinearOpMode {
         final double driveTrainScalar = 0.85;
 
         // declare position constants
-        final int hangMax = 8000;
+        final int hangMax = 8500;
         final int hangMaxSpeed = 4500;
         final int hangMin = 100;
         final int hangMinSpeed = 4000;
@@ -171,7 +181,17 @@ public class teleDeepTesting extends LinearOpMode {
                 lHanger.setPower(0);
                 rHanger.setPower(0);
             }
+
+
+            if (gamepad2.dpad_down) {
+                lGripper.setPosition(0.5);
+                rGripper.setPosition(0.5);
+            } else if (gamepad2.dpad_up) {
+                lGripper.setPosition(0);
+                rGripper.setPosition(1.0);
+            }
+
         }
-    }
 //ion like watewrmelon chicken shadow people
+    }
 }
