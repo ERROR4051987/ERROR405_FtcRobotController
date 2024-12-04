@@ -21,8 +21,8 @@ public class teleDeepTesting extends LinearOpMode {
     // declare secondary motors
     private DcMotorEx lHanger = null;
     private DcMotorEx rHanger = null;
-    private DcMotorEx lift = null;
     private DcMotorEx arm = null;
+    private DcMotorEx slide = null;
 
     // declare servos
     private Servo lGripper = null;
@@ -38,8 +38,8 @@ public class teleDeepTesting extends LinearOpMode {
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
-        lift = hardwareMap.get(DcMotorEx.class, "lift");
-        arm = hardwareMap.get(DcMotorEx.class, "arm");
+        arm = hardwareMap.get(DcMotorEx.class, "lift");
+        slide = hardwareMap.get(DcMotorEx.class, "slide");
         lHanger = hardwareMap.get(DcMotorEx.class, "leftHanger");
         rHanger = hardwareMap.get(DcMotorEx.class, "rightHanger");
 
@@ -52,14 +52,15 @@ public class teleDeepTesting extends LinearOpMode {
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rHanger.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // customize motor modes
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -70,17 +71,25 @@ public class teleDeepTesting extends LinearOpMode {
         double rightPower;
         double leftStrafe;
         double rightStrafe;
+        double armLowerPower;
+        double armRaisePower;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
         final double strafeScalar = 0.95;
         final double driveTrainScalar = 0.85;
+        final double slideExtend = 0.7;
+        final double slideRetract = 0.4;
 
         // declare position constants
         final int hangMax = 8500;
         final int hangMaxSpeed = 4500;
         final int hangMin = 100;
         final int hangMinSpeed = 4000;
+        final double lGripClose = 0.5;
+        final double lGripOpen = 0.0;
+        final double rGripClose = 0.5;
+        final double rGripOpen = 1.0;
 
         //carter quit looking at this
         waitForStart();
@@ -93,9 +102,12 @@ public class teleDeepTesting extends LinearOpMode {
             leftStrafe = gamepad1.left_trigger;
             rightStrafe = gamepad1.right_trigger;
 
+            armLowerPower = gamepad2.left_trigger;
+            armRaisePower = gamepad2.right_trigger;
+
             // player 2 booleans
-            boolean hangStart = gamepad2.a && !gamepad2.x;
-            boolean hanging = gamepad2.a && gamepad2.x;
+            boolean hangStart = gamepad2.a && !gamepad2.y;
+            boolean hanging = gamepad2.a && gamepad2.y;
 
             if (!hanging) {
                 bl.setPower(leftPower * driveTrainScalar);
@@ -182,13 +194,16 @@ public class teleDeepTesting extends LinearOpMode {
                 rHanger.setPower(0);
             }
 
+            arm.setPower(armRaisePower - armLowerPower);
+
+            slide.setPower(slideExtend - slideRetract);
 
             if (gamepad2.dpad_down) {
-                lGripper.setPosition(0.5);
-                rGripper.setPosition(0.5);
+                lGripper.setPosition(lGripClose);
+                rGripper.setPosition(rGripClose);
             } else if (gamepad2.dpad_up) {
-                lGripper.setPosition(0);
-                rGripper.setPosition(1.0);
+                lGripper.setPosition(lGripOpen);
+                rGripper.setPosition(rGripOpen);
             }
 
         }
