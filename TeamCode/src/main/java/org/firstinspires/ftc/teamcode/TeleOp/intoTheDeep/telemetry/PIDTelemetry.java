@@ -31,7 +31,7 @@ public class PIDTelemetry extends OpMode {
         controller = new PIDController(p, i, d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        lift = hardwareMap.get(DcMotorEx.class, "arm");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }

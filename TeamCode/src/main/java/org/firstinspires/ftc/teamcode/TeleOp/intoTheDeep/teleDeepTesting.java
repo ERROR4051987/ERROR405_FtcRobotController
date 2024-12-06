@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
-
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="teleDeepTesting", group="intoTheDeepTesting")
@@ -28,8 +27,6 @@ public class teleDeepTesting extends LinearOpMode {
     private Servo lGripper = null;
     private Servo rGripper = null;
 
-    private PIDController controller;
-
     @Override
     public void runOpMode() {
 
@@ -38,7 +35,7 @@ public class teleDeepTesting extends LinearOpMode {
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
-        arm = hardwareMap.get(DcMotorEx.class, "lift");
+        arm = hardwareMap.get(DcMotorEx.class, "arm");
         slide = hardwareMap.get(DcMotorEx.class, "slide");
         lHanger = hardwareMap.get(DcMotorEx.class, "leftHanger");
         rHanger = hardwareMap.get(DcMotorEx.class, "rightHanger");
@@ -54,13 +51,13 @@ public class teleDeepTesting extends LinearOpMode {
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rHanger.setDirection(DcMotorSimple.Direction.REVERSE);
+        lHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // customize motor modes
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lHanger.setDirection(DcMotorSimple.Direction.REVERSE);
         lHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -79,7 +76,7 @@ public class teleDeepTesting extends LinearOpMode {
         final double strafeScalar = 0.95;
         final double driveTrainScalar = 0.85;
         final double slideExtend = 0.7;
-        final double slideRetract = 0.4;
+        final double slideRetract = -0.4;
 
         // declare position constants
         final int hangMax = 8500;
@@ -91,10 +88,16 @@ public class teleDeepTesting extends LinearOpMode {
         final double rGripClose = 0.5;
         final double rGripOpen = 1.0;
 
+        PIDFCoefficients pidf = new PIDFCoefficients(0.041, 0, 0.0011, 0.31);
+
         //carter quit looking at this
         waitForStart();
 
         while (opModeIsActive()) {
+
+            telemetry.addData("arm pid", arm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+            telemetry.addLine("change setVelocityPIDFCoefficients to use the same PID, but raise the F value");
+            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -194,9 +197,28 @@ public class teleDeepTesting extends LinearOpMode {
                 rHanger.setPower(0);
             }
 
-            arm.setPower(armRaisePower - armLowerPower);
+//            arm.setPower(armRaisePower - armLowerPower);
 
-            slide.setPower(slideExtend - slideRetract);
+//            if (gamepad2.start) {
+//                arm.setPower(0.8);
+//            }
+            if (gamepad2.right_trigger > 0) {
+//                arm.setVelocityPIDFCoefficients(0.31, 0, 0.0011, 0.31);
+                arm.setVelocity(1000);
+            } else if (gamepad2.left_trigger > 0) {
+//                arm.setVelocityPIDFCoefficients(0.041, 0, 0.0011, 0.31);
+                arm.setVelocity(-1000);
+            } else {
+                arm.setVelocity(0);
+            }
+
+            if (gamepad2.right_bumper) {
+                slide.setPower(slideExtend);
+            } else if (gamepad2.left_bumper) {
+                slide.setPower(slideRetract);
+            } else {
+                slide.setPower(0);
+            }
 
             if (gamepad2.dpad_down) {
                 lGripper.setPosition(lGripClose);
@@ -207,6 +229,5 @@ public class teleDeepTesting extends LinearOpMode {
             }
 
         }
-//ion like watewrmelon chicken shadow people
     }
 }
