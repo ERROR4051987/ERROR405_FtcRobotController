@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.Auto.BR;
+package org.firstinspires.ftc.teamcode.Auto.BL;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,9 +8,10 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Config
 @Autonomous (name= "BRNormal", group= "autoBR", preselectTeleOp = "teleDeep")
 public class BRNormal extends LinearOpMode {
 
@@ -20,10 +22,14 @@ public class BRNormal extends LinearOpMode {
     private DcMotorEx fr = null;
 
     // declare servos
-    private CRServo intake = null;
+    private Servo lGripper = null;
+    private Servo rGripper = null;
 
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
+
+    // TODO: tune this value tomorrow
+    public static final int square = 0;
 
     @Override
     public void runOpMode() {
@@ -44,29 +50,25 @@ public class BRNormal extends LinearOpMode {
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // init and set up servos
-        intake = hardwareMap.get(CRServo.class, "intake");
-
+        lGripper = hardwareMap.get(Servo.class, "lGrip");
+        rGripper = hardwareMap.get(Servo.class, "rGrip");
 
         // position constants
-        final int elbowHalf = -1214;
-        final int elbowReset = 0;
-        final int Vertical = 500;
-        final int Reset = 0;
+        final double lGripClose = 0.5;
+        final double lGripOpen = 0.0;
+        final double rGripClose = 0.5;
+        final double rGripOpen = 1.0;
 
         //tps and speed constants
         final double brake = 0;
+
 
         waitForStart();
         runtime.reset();
 
         while(opModeIsActive()) {
 
-            posForward(400, 200);
-
-            posStrafeRight(700, 2000);
-
-            intake.setPower(1.0);
-            sleep(3000);
+            posForward(600, square);
 
             requestOpModeStop();
         }
@@ -197,27 +199,6 @@ public class BRNormal extends LinearOpMode {
         resetMotorsAndTime();
     }
 
-    private void sampleSuck() {
-
-        intake.setPower(-1.0);
-        while (opModeIsActive() && (runtime.seconds() <= Math.abs(1))) {
-            idle();
-        } runtime.reset();
-    }
-
-    private void sampleSpit() {
-
-        intake.setPower(1.0);
-        while (opModeIsActive() && (runtime.seconds() <= Math.abs(3.0))) {
-            idle();
-        } runtime.reset();
-    }
-
-    private void colorScan (String location) {
-
-
-    }
-
     private void stop(double time) {
 
         bl.setPower(0);
@@ -254,11 +235,4 @@ public class BRNormal extends LinearOpMode {
 
     }
 
-    private void unloadSampleintoBasket (String location) {
-
-    }
-
-    private void hangPreloadSpecimen () {
-
-    }
 }

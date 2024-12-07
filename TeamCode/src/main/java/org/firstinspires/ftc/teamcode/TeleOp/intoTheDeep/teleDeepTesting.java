@@ -56,6 +56,8 @@ public class teleDeepTesting extends LinearOpMode {
 
         // customize motor modes
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setTargetPosition(0);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lHanger.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -78,6 +80,7 @@ public class teleDeepTesting extends LinearOpMode {
         final double driveTrainScalar = 0.85;
         final double slideExtend = 0.7;
         final double slideRetract = -500;
+        final double armVelocityScalar = 600;
 
         // declare position constants
         final int hangMax = 8500;
@@ -212,26 +215,24 @@ public class teleDeepTesting extends LinearOpMode {
 //            }
             if (gamepad2.right_trigger > 0) {
                 arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
-                arm.setVelocity(600 * gamepad2.right_trigger);
+                arm.setVelocity(armVelocityScalar * armRaisePower);
             } else if (gamepad2.left_trigger > 0) {
                 arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
-                arm.setVelocity(-600 * gamepad2.left_trigger);
+                arm.setVelocity(-armVelocityScalar * armLowerPower);
             } else {
                 arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
-                arm.setVelocity(1);
+                arm.setVelocity(0.85);
             }
 
             if (gamepad2.right_bumper) {
                 slide.setTargetPosition(292);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setVelocity(600);
+                slide.setVelocity(800);
 //                slide.setPower(slideExtend);
             } else if (gamepad2.left_bumper) {
                 slide.setTargetPosition(10);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 slide.setVelocity(slideRetract);
             } else {
-                slide.setVelocity(0);
+                slide.setVelocity(0.5);
             }
 
             if (gamepad2.dpad_down) {
