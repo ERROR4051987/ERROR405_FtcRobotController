@@ -1,18 +1,16 @@
 package org.firstinspires.ftc.teamcode.TeleOp.intoTheDeep;
-
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-@Disabled
-@TeleOp(name="TeleDeepStable", group="intoTheDeep")
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@TeleOp(name="teleDeepStable", group="intoTheDeep")
 
 public class teleDeepStable extends LinearOpMode {
-
+    // ni-ce kool aid person
     // declare drivetrain motors
     private DcMotor bl = null;
     private DcMotor br = null;
@@ -20,64 +18,88 @@ public class teleDeepStable extends LinearOpMode {
     private DcMotor fr = null;
 
     // declare secondary motors
-    private DcMotorEx slide = null;
+    private DcMotorEx lHanger = null;
+    private DcMotorEx rHanger = null;
     private DcMotorEx arm = null;
+    private DcMotorEx slide = null;
 
     // declare servos
-    private CRServo intake = null;
-
-    // declare sensors
-    private RevColorSensorV3 color = null;
-
-    private PIDController controller;
+    private Servo lGripper = null;
+    private Servo rGripper = null;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
         // init and set up motors
         bl = hardwareMap.get(DcMotor.class, "backLeft");
         br = hardwareMap.get(DcMotor.class, "backRight");
         fl = hardwareMap.get(DcMotor.class, "frontLeft");
         fr = hardwareMap.get(DcMotor.class, "frontRight");
-        slide = hardwareMap.get(DcMotorEx.class, "slide");
         arm = hardwareMap.get(DcMotorEx.class, "arm");
+        slide = hardwareMap.get(DcMotorEx.class, "slide");
+        lHanger = hardwareMap.get(DcMotorEx.class, "leftHanger");
+        rHanger = hardwareMap.get(DcMotorEx.class, "rightHanger");
+
+        // init and set up servos
+        lGripper = hardwareMap.get(Servo.class, "lGrip");
+        rGripper = hardwareMap.get(Servo.class, "rGrip");
 
         // customize motor zero power behavior
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lHanger.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // customize motor modes
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        color = hardwareMap.get(RevColorSensorV3.class, "colorLeft");
-
-        intake = hardwareMap.get(CRServo.class, "intake");
+        slide.setTargetPosition(0);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lHanger.setDirection(DcMotorSimple.Direction.REVERSE);
+        lHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rHanger.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rHanger.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // declare speed variables (mutable)
         double leftPower;
         double rightPower;
         double leftStrafe;
         double rightStrafe;
+        double armLowerPower;
+        double armRaisePower;
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
         final double strafeScalar = 0.95;
         final double driveTrainScalar = 0.85;
-        final double slideVelocity = 100;
-        final double intakePower = 1.0;
+        final double slideExtend = 0.7;
+        final double slideRetract = -700;
+        final double armVelocityScalar = 600;
 
-        color.initialize();
+        // declare position constants
+        final int hangMax = 8500;
+        final int hangMaxSpeed = 4500;
+        final int hangMin = 100;
+        final int hangMinSpeed = 4000;
+        final double lGripClose = 0.5;
+        final double lGripOpen = 0.0;
+        final double rGripClose = 0.5;
+        final double rGripOpen = 1.0;
 
+        //carter quit looking at this
         waitForStart();
 
         while (opModeIsActive()) {
 
+            telemetry.addData("arm pid", arm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+            telemetry.addLine("change setVelocityPIDFCoefficients to use the same PID, but raise the F value");
+            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -85,14 +107,23 @@ public class teleDeepStable extends LinearOpMode {
             leftStrafe = gamepad1.left_trigger;
             rightStrafe = gamepad1.right_trigger;
 
-            bl.setPower(leftPower * driveTrainScalar);
-            fl.setPower(leftPower * driveTrainScalar);
+            armLowerPower = gamepad2.left_trigger;
+            armRaisePower = gamepad2.right_trigger;
 
-            br.setPower(rightPower * driveTrainScalar);
-            fr.setPower(rightPower * driveTrainScalar);
+            // player 2 booleans
+            boolean hangStart = gamepad2.a && !gamepad2.y;
+            boolean hanging = gamepad2.a && gamepad2.y;
+
+            if (!hanging) {
+                bl.setPower(leftPower * driveTrainScalar);
+                fl.setPower(leftPower * driveTrainScalar);
+
+                br.setPower(rightPower * driveTrainScalar);
+                fr.setPower(rightPower * driveTrainScalar);
+            }
 
             // strafe left and right
-            if (gamepad1.left_trigger > 0) {
+            if (gamepad1.left_trigger > 0 && !hanging) {
 
                 bl.setPower(-leftStrafe * strafeScalar);
                 fl.setPower(leftStrafe * strafeScalar);
@@ -100,7 +131,7 @@ public class teleDeepStable extends LinearOpMode {
                 br.setPower(-leftStrafe * strafeScalar);
                 fr.setPower(leftStrafe * strafeScalar);
 
-            } else if (gamepad1.right_trigger > 0) {
+            } else if (gamepad1.right_trigger > 0 && !hanging) {
 
                 bl.setPower(rightStrafe * strafeScalar);
                 fl.setPower(-rightStrafe * strafeScalar);
@@ -109,7 +140,7 @@ public class teleDeepStable extends LinearOpMode {
                 fr.setPower(-rightStrafe * strafeScalar);
             }
 
-            if (gamepad1.dpad_up && gamepad1.left_bumper) {
+            if (gamepad1.dpad_up && gamepad1.left_bumper && !hanging) {
 
                 bl.setPower(-diagonalStrafePower);
                 fl.setPower(0);
@@ -118,7 +149,7 @@ public class teleDeepStable extends LinearOpMode {
                 fr.setPower(diagonalStrafePower);
                 // upLeft
 
-            } else if (gamepad1.dpad_down && gamepad1.left_bumper) {
+            } else if (gamepad1.dpad_down && gamepad1.left_bumper && !hanging) {
 
                 bl.setPower(0);
                 fl.setPower(diagonalStrafePower);
@@ -127,9 +158,9 @@ public class teleDeepStable extends LinearOpMode {
                 fr.setPower(0);
                 // downLeft
 
-            } else if (gamepad1.dpad_up && gamepad1.right_bumper) {
+            } else if (gamepad1.dpad_up && gamepad1.right_bumper && !hanging) {
 
-
+                //skibidi
                 bl.setPower(0);
                 fl.setPower(-diagonalStrafePower);
 
@@ -137,7 +168,7 @@ public class teleDeepStable extends LinearOpMode {
                 fr.setPower(0);
                 // upRight
 
-            } else if (gamepad1.dpad_down && gamepad1.right_bumper) {
+            } else if (gamepad1.dpad_down && gamepad1.right_bumper && !hanging) {
 
                 bl.setPower(diagonalStrafePower);
                 fl.setPower(0);
@@ -148,56 +179,70 @@ public class teleDeepStable extends LinearOpMode {
 
             }
 
-            armPID();
+//            if (gamepad2.b) {
+//                slide.setTargetPosition(262);
+//                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                slide.setVelocity(500);
+//                sleep(1000);
+//                lGripper.setPosition(lGripOpen);
+//                rGripper.setPosition(rGripOpen);
+//            }
 
-            if (gamepad2.dpad_up) {
-                intake.setPower(intakePower);
-            } else if (gamepad2.dpad_down) {
-                intake.setPower(-intakePower);
+            if (hangStart) {
+                lHanger.setTargetPosition(hangMax);
+                lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lHanger.setVelocity(hangMaxSpeed);
+                rHanger.setTargetPosition(hangMax);
+                rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rHanger.setVelocity(hangMaxSpeed);
+            } else if (hanging) {
+                lHanger.setTargetPosition(hangMin);
+                lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lHanger.setVelocity(hangMinSpeed);
+                rHanger.setTargetPosition(hangMin);
+                rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rHanger.setVelocity(hangMinSpeed);
+                sleep(30000);
             } else {
-                intake.setPower(0);
+                lHanger.setPower(0);
+                rHanger.setPower(0);
+            }
+
+//            arm.setPower(armRaisePower - armLowerPower);
+
+//            if (gamepad2.start) {
+//                arm.setPower(0.8);
+//            }
+            if (gamepad2.right_trigger > 0) {
+                arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
+                arm.setVelocity(armVelocityScalar * armRaisePower);
+            } else if (gamepad2.left_trigger > 0) {
+                arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
+                arm.setVelocity(-armVelocityScalar * armLowerPower);
+            } else {
+                arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
+                arm.setVelocity(0.85);
             }
 
             if (gamepad2.right_bumper) {
-                slide.setVelocity(-slideVelocity);
+                slide.setTargetPosition(292);
+                slide.setVelocity(2500);
+//                slide.setPower(slideExtend);
             } else if (gamepad2.left_bumper) {
-                slide.setVelocity(slideVelocity);
+                slide.setTargetPosition(10);
+                slide.setVelocity(slideRetract);
             } else {
-                slide.setPower(0);
+                slide.setVelocity(0.5);
+            }
+
+            if (gamepad2.dpad_down) {
+                lGripper.setPosition(lGripClose);
+                rGripper.setPosition(rGripClose);
+            } else if (gamepad2.dpad_up) {
+                lGripper.setPosition(lGripOpen);
+                rGripper.setPosition(rGripOpen);
             }
 
         }
-
     }
-
-    private void armPID() {
-        double p = 0, i = 0, d = 0;
-        double f = 0;
-
-        final double ticksInDegree = 1425.1;
-        controller = new PIDController(p, i, d);
-        int posPower = 0;
-
-        if (gamepad2.right_trigger > 0) {
-            posPower = 30;
-        } else if (gamepad2.left_trigger > 0) {
-            posPower = -30;
-        } else {
-            posPower = 0;
-        }
-
-        controller.setPID(p, i, d);
-        int armPos = arm.getCurrentPosition();
-        int target = armPos + posPower;
-        double pid = controller.calculate(armPos, target);
-        double ff = Math.cos(Math.toRadians(target / ticksInDegree)) * f;
-
-        double power = pid + ff;
-
-        arm.setPower(power);
-    }
-
 }
-
-
-

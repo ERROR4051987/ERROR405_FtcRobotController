@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-@Autonomous (name= "BLNormal", group= "autoBL", preselectTeleOp = "teleDeep")
-public class BLNormal extends LinearOpMode {
+@Autonomous (name= "rightSide", group= "autoRight", preselectTeleOp = "teleDeepStable")
+public class rightSide extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotorEx bl = null;
@@ -28,8 +28,8 @@ public class BLNormal extends LinearOpMode {
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
 
-    // TODO: tune this value tomorrow
-    public static final int square = 0;
+    public static int square = 1000;
+
 
     @Override
     public void runOpMode() {

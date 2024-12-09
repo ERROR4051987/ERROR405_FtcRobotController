@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Auto.BL;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -12,14 +13,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-@Autonomous (name= "BRNormal", group= "autoBR", preselectTeleOp = "teleDeep")
-public class BRNormal extends LinearOpMode {
+@Autonomous (name= "leftSide", group= "autoLeft", preselectTeleOp = "teleDeepStable")
+public class leftSide extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotorEx bl = null;
     private DcMotorEx br = null;
     private DcMotorEx fl = null;
     private DcMotorEx fr = null;
+
+    // declare secondary motors
+
+    private DcMotorEx arm = null;
+    private DcMotorEx slide = null;
 
     // declare servos
     private Servo lGripper = null;
@@ -28,8 +34,9 @@ public class BRNormal extends LinearOpMode {
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
 
-    // TODO: tune this value tomorrow
-    public static final int square = 0;
+    public static int square = 1000;
+    public static int halfTurn = 500;
+    public static int fullTurn = 1000;
 
     @Override
     public void runOpMode() {
@@ -40,11 +47,16 @@ public class BRNormal extends LinearOpMode {
         fl = hardwareMap.get(DcMotorEx.class, "frontLeft");
         fr = hardwareMap.get(DcMotorEx.class, "frontRight");
 
+        arm = hardwareMap.get(DcMotorEx.class, "arm");
+        slide = hardwareMap.get(DcMotorEx.class, "slide");
+
         // set all drivetrain motors' encoders to 0
         bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -68,7 +80,22 @@ public class BRNormal extends LinearOpMode {
 
         while(opModeIsActive()) {
 
-            posForward(600, square);
+            lGripper.setPosition(lGripClose);
+            rGripper.setPosition(rGripClose);
+
+            posForward(1000, square);
+
+            stop(0.3);
+
+            posStrafeRight(900, 1500);
+
+            score(-130, 500, 450, 1500, lGripOpen, rGripOpen);
+
+            retract();
+
+            posStrafeRight(1000, square * 3);
+
+            posTurnRight(800, fullTurn);
 
             requestOpModeStop();
         }
@@ -197,6 +224,42 @@ public class BRNormal extends LinearOpMode {
         }
 
         resetMotorsAndTime();
+    }
+
+    public void retract() {
+        arm.setTargetPosition(0);
+        arm.setVelocity(400);
+        while (opModeIsActive() && arm.isBusy()) {
+            idle();
+        }
+        slide.setTargetPosition(0);
+        slide.setVelocity(500);
+        while (opModeIsActive() && slide.isBusy()) {
+            idle();
+        }
+        runtime.reset();
+    }
+    public void score(int armPos, double armTps, int slidePos, double slideTps, double lOpen, double rOpen) {
+        slide.setTargetPosition(slidePos);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        slide.setVelocity(slideTps);
+        arm.setTargetPosition(armPos);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setVelocity(armTps);
+        while (opModeIsActive() && slide.isBusy() && arm.isBusy()) {
+            idle();
+        }
+//        sleep(1500);
+        slide.setTargetPosition(185);
+        slide.setVelocity(450);
+        while (opModeIsActive() && slide.isBusy()) {
+            idle();
+        }
+//        sleep(1300);
+        lGripper.setPosition(lOpen);
+        rGripper.setPosition(rOpen);
+        sleep(1000);
+        runtime.reset();
     }
 
     private void stop(double time) {
