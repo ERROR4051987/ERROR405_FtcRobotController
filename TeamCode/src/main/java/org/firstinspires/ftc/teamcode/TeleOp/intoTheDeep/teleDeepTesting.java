@@ -87,9 +87,9 @@ public class teleDeepTesting extends LinearOpMode {
         final int hangMaxSpeed = 4500;
         final int hangMin = 100;
         final int hangMinSpeed = 4000;
-        final double lGripClose = 0.5;
+        final double lGripClose = 0.44;
         final double lGripOpen = 0.0;
-        final double rGripClose = 0.5;
+        final double rGripClose = 0.375;
         final double rGripOpen = 1.0;
 
         //carter quit looking at this
