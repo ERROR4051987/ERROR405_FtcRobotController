@@ -79,7 +79,7 @@ public class teleDeepStable extends LinearOpMode {
         final double strafeScalar = 0.95;
         final double driveTrainScalar = 0.85;
         final double slideExtend = 0.7;
-        final double slideRetract = -700;
+        final double slideRetract = -500;
         final double armVelocityScalar = 600;
 
         // declare position constants
@@ -87,9 +87,9 @@ public class teleDeepStable extends LinearOpMode {
         final int hangMaxSpeed = 4500;
         final int hangMin = 100;
         final int hangMinSpeed = 4000;
-        final double lGripClose = 1.0;
+        final double lGripClose = 0.5;
         final double lGripOpen = 0.0;
-        final double rGripClose = 0.2;
+        final double rGripClose = 0.5;
         final double rGripOpen = 1.0;
 
         //carter quit looking at this
@@ -226,8 +226,7 @@ public class teleDeepStable extends LinearOpMode {
 
             if (gamepad2.right_bumper) {
                 slide.setTargetPosition(292);
-                slide.setVelocity(2500);
-//                slide.setPower(slideExtend);
+                slide.setVelocity(800);
             } else if (gamepad2.left_bumper) {
                 slide.setTargetPosition(10);
                 slide.setVelocity(slideRetract);

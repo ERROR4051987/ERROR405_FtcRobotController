@@ -34,18 +34,19 @@ public class leftSide extends LinearOpMode {
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
 
-    public static int square = 950;
+    public static int square = 965;
+    public static int initPos = 965;
     public static int fullTurn = 2300;
     public double armTps = 500;
     public double slideTps = 1500;
+
     public int armPos = -130;
     public int slidePos = 350;
     public int slideReturnPos = 400;
-    public static int forwardPos = 185;
-    public static int armGrabPos = -345;
+    public static int forwardPos = 200;
+    public static int armGrabPos = -335;
     public static double armGrabTps = 500;
-    public static int grabDrive = 2450;
-    public static int preScoreStrafe = 1300;
+    public static int grabDrive = 2455;
 
     @Override
     public void runOpMode() {
@@ -75,9 +76,9 @@ public class leftSide extends LinearOpMode {
         rGripper = hardwareMap.get(Servo.class, "rGrip");
 
         // position constants
-        final double lGripClose = 0.44;
+        final double lGripClose = 0.5;
         final double lGripOpen = 0.0;
-        final double rGripClose = 0.375;
+        final double rGripClose = 0.5;
         final double rGripOpen = 1.0;
 
         waitForStart();
@@ -88,17 +89,17 @@ public class leftSide extends LinearOpMode {
 
             closeGrippers(lGripClose,rGripClose);
 
-            posForward(900, square);
+            posForward(900, initPos);
 
-            stop(0.5);
-
-            posStrafeRight(1000, 1600);
+            trueStop("REVERSE");
 
             score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
             retract(false);
 
             posStrafeRight(1400, grabDrive);
+
+            trueStop("LEFT");
 
             stop(0.5);
 
@@ -112,11 +113,15 @@ public class leftSide extends LinearOpMode {
 
             retract(true);
 
-            posTurnLeft(800, fullTurn - 100);
+            posReverse(500, forwardPos - 250);
 
-            stop(0.5);
+            posTurnLeft(800, fullTurn - 150);
 
-            posStrafeLeft(1400, 2325);
+            trueStop("TURNRIGHT");
+
+            posStrafeLeft(1000, 2150);
+
+            posTurnLeft(500, 50);
 
             score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
@@ -124,7 +129,9 @@ public class leftSide extends LinearOpMode {
 
             posStrafeRight(1500, 2400);
 
-            posReverse(1000, 550);
+            stop(0.2);
+
+            posReverse(1400, 700);
 
             closeGrippers(lGripClose, rGripClose);
 
@@ -147,7 +154,7 @@ public class leftSide extends LinearOpMode {
         fl.setVelocity(Math.abs(tps));
         fr.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()){
             idle();
         }
 
@@ -167,7 +174,7 @@ public class leftSide extends LinearOpMode {
         fr.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()) {
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()) {
             idle();
         }
 
@@ -188,7 +195,7 @@ public class leftSide extends LinearOpMode {
         fr.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()) {
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()) {
             idle();
         }
 
@@ -209,7 +216,7 @@ public class leftSide extends LinearOpMode {
         fr.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()){
             idle();
         }
 
@@ -229,7 +236,7 @@ public class leftSide extends LinearOpMode {
         fr.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()){
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()){
             idle();
         }
 
@@ -250,11 +257,13 @@ public class leftSide extends LinearOpMode {
         fr.setVelocity(Math.abs(tps));
         br.setVelocity(Math.abs(tps));
 
-        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy()) {
+        while (bl.isBusy() && fl.isBusy() && fr.isBusy() && br.isBusy() && opModeIsActive()) {
             idle();
         }
 
         resetMotorsAndTime();
+
+        
     }
 
     public void retract(boolean grabbed) {
@@ -333,6 +342,42 @@ public class leftSide extends LinearOpMode {
             idle();
         } runtime.reset();
 
+    }
+
+    public void trueStop (String mode) {
+        switch (mode) {
+            case "REVERSE":
+                bl.setPower(-0.15);
+                fl.setPower(-0.15);
+                br.setPower(-0.15);
+                fr.setPower(-0.15);
+
+                while ((opModeIsActive() && (runtime.seconds() <= 0.2))) {
+                    idle();
+                }
+                runtime.reset();
+                break;
+
+            case "LEFT":
+                bl.setPower(0.25);
+                fl.setPower(-0.25);
+                fr.setPower(0.25);
+                br.setPower(-0.25);
+                while ((opModeIsActive() && (runtime.seconds() <= 0.15))) {
+                    idle();
+                }
+                break;
+
+            case "TURNRIGHT":
+                bl.setPower(0.1);
+                fl.setPower(0.1);
+                fr.setPower(-0.1);
+                br.setPower(-0.1);
+
+                while ((opModeIsActive() && (runtime.seconds() <= 0.2))) {
+                    idle();
+                }
+        }
     }
 
     private void resetMotorsAndTime() {
