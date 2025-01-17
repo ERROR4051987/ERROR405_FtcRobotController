@@ -26,7 +26,7 @@ public class generalTelemetry extends OpMode {
     public void loop() {
 
         telemetry.addData("current pos", arm.getCurrentPosition());
-        telemetry.addData("backBoundary", backPos);
+        telemetry.addData("origin", backPos);
         telemetry.addData("frontBoundary", frontPos);
         telemetry.update();
 

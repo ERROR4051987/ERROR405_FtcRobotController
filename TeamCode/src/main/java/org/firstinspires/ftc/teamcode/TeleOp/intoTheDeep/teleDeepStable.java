@@ -76,7 +76,7 @@ public class teleDeepStable extends LinearOpMode {
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
-        final double strafeScalar = 0.95;
+        final double strafeScalar = 1.0;
         final double driveTrainScalar = 0.85;
         final double slideExtend = 0.7;
         final double slideRetract = -500;
@@ -96,10 +96,6 @@ public class teleDeepStable extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
-            telemetry.addData("arm pid", arm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
-            telemetry.addLine("change setVelocityPIDFCoefficients to use the same PID, but raise the F value");
-            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
@@ -179,15 +175,6 @@ public class teleDeepStable extends LinearOpMode {
 
             }
 
-//            if (gamepad2.b) {
-//                slide.setTargetPosition(262);
-//                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                slide.setVelocity(500);
-//                sleep(1000);
-//                lGripper.setPosition(lGripOpen);
-//                rGripper.setPosition(rGripOpen);
-//            }
-
             if (hangStart) {
                 lHanger.setTargetPosition(hangMax);
                 lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -208,11 +195,6 @@ public class teleDeepStable extends LinearOpMode {
                 rHanger.setPower(0);
             }
 
-//            arm.setPower(armRaisePower - armLowerPower);
-
-//            if (gamepad2.start) {
-//                arm.setPower(0.8);
-//            }
             if (gamepad2.right_trigger > 0) {
                 arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
                 arm.setVelocity(armVelocityScalar * armRaisePower);

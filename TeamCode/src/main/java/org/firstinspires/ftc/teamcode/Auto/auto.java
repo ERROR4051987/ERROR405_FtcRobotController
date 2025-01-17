@@ -1,11 +1,8 @@
-package org.firstinspires.ftc.teamcode.Auto.BL;
+package org.firstinspires.ftc.teamcode.Auto;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -13,8 +10,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-@Autonomous (name= "leftSide", group= "autoLeft", preselectTeleOp = "teleDeepStable")
-public class leftSide extends LinearOpMode {
+@Autonomous (name= "auto", group= "auto", preselectTeleOp = "teleDeepStable")
+public class auto extends LinearOpMode {
 
     // declare drivetrain motors
     private DcMotorEx bl = null;

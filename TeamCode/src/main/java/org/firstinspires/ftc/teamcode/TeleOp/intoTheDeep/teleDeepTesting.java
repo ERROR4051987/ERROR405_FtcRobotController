@@ -76,7 +76,7 @@ public class teleDeepTesting extends LinearOpMode {
 
         // declare speed constants (immutable)
         final double diagonalStrafePower = 0.7;
-        final double strafeScalar = 0.95;
+        final double strafeScalar = 1.0;
         final double driveTrainScalar = 0.85;
         final double slideExtend = 0.7;
         final double slideRetract = -500;
@@ -96,10 +96,6 @@ public class teleDeepTesting extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
-            telemetry.addData("arm pid", arm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
-            telemetry.addLine("change setVelocityPIDFCoefficients to use the same PID, but raise the F value");
-            telemetry.update();
 
             // these speed variables are mutabable
             leftPower = gamepad1.left_stick_y;
