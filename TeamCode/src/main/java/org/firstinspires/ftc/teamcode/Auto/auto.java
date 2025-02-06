@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @Autonomous (name= "auto", group= "auto", preselectTeleOp = "teleDeepStable")
@@ -28,19 +31,22 @@ public class auto extends LinearOpMode {
     private Servo lGripper = null;
     private Servo rGripper = null;
 
+    // Declare sensors
+    private RevColorSensorV3 distance = null;
+
     // make time move for stuff
     private ElapsedTime runtime = new ElapsedTime();
 
     public static int square = 965;
-    public static int initPos = 965;
-    public static int fullTurn = 2300;
+    public static int initPos = 915;
+    public static int fullTurn = 2320;
     public double armTps = 500;
     public double slideTps = 1500;
 
     public int armPos = -130;
     public int slidePos = 350;
     public int slideReturnPos = 400;
-    public static int forwardPos = 200;
+    public static int forwardPos = 120;
     public static int armGrabPos = -335;
     public static double armGrabTps = 500;
     public static int grabDrive = 2455;
@@ -72,6 +78,9 @@ public class auto extends LinearOpMode {
         lGripper = hardwareMap.get(Servo.class, "lGrip");
         rGripper = hardwareMap.get(Servo.class, "rGrip");
 
+        // init and set up sensors
+        distance = hardwareMap.get(RevColorSensorV3.class, "distance");
+
         // position constants
         final double lGripClose = 0.5;
         final double lGripOpen = 0.0;
@@ -86,7 +95,7 @@ public class auto extends LinearOpMode {
 
             closeGrippers(lGripClose,rGripClose);
 
-            posForward(900, initPos);
+            posForward(1000, initPos);
 
             trueStop("REVERSE");
 
@@ -94,45 +103,87 @@ public class auto extends LinearOpMode {
 
             retract(false);
 
-            posStrafeRight(1400, grabDrive);
+            posStrafeRight(1300, grabDrive);
 
             trueStop("LEFT");
 
             stop(0.5);
 
-            posTurnRight(1000, fullTurn);
+            posTurnRight(1100, fullTurn);
 
             stop(0.4);
 
-            posForward(500, forwardPos);
+            posForward(600, 100);
+
+            stop(1.0);
 
             grab(armGrabPos, armGrabTps, lGripClose, rGripClose);
 
             retract(true);
 
-            posReverse(500, forwardPos - 250);
+            posReverse(500, forwardPos - 50);
 
-            posTurnLeft(800, fullTurn - 150);
+            posTurnLeft(800, fullTurn - 100);
 
             trueStop("TURNRIGHT");
 
-            posStrafeLeft(1000, 2150);
+            posStrafeLeft(900, 2150);
 
             posTurnLeft(500, 50);
 
-            score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
+            stop(0.5);
 
-            retract(false);
+            if ((distance.getDistance(DistanceUnit.INCH)) >= 4
+                    && (distance.getDistance(DistanceUnit.INCH)) < 5) {
 
-            posStrafeRight(1500, 2400);
+                score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
-            stop(0.2);
+                retract(false);
 
-            posReverse(1400, 700);
+                posStrafeRight(1500, 2400);
 
-            closeGrippers(lGripClose, rGripClose);
+                stop(0.2);
 
-            requestOpModeStop();
+                posReverse(1400, 700);
+
+                closeGrippers(lGripClose, rGripClose);
+
+                requestOpModeStop();
+
+            } else if (distance.getDistance(DistanceUnit.INCH) >= 5) {
+                posForward(100, 75);
+
+                score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
+
+                retract(false);
+
+                posStrafeRight(1500, 2400);
+
+                stop(0.2);
+
+                posReverse(1400, 700);
+
+                closeGrippers(lGripClose, rGripClose);
+
+                requestOpModeStop();
+            } else {
+                posReverse(150, 120);
+
+                score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
+
+                retract(false);
+
+                posStrafeRight(1500, 2400);
+
+                stop(0.2);
+
+                posReverse(1400, 700);
+
+                closeGrippers(lGripClose, rGripClose);
+
+                requestOpModeStop();
+            }
+
         }
 
     }
@@ -304,7 +355,7 @@ public class auto extends LinearOpMode {
             idle();
         }
 //        sleep(1500);
-        slide.setTargetPosition(177);
+        slide.setTargetPosition(185);
         slide.setVelocity(460);
         while (opModeIsActive() && slide.isBusy()) {
             idle();
@@ -344,10 +395,10 @@ public class auto extends LinearOpMode {
     public void trueStop (String mode) {
         switch (mode) {
             case "REVERSE":
-                bl.setPower(-0.15);
-                fl.setPower(-0.15);
-                br.setPower(-0.15);
-                fr.setPower(-0.15);
+                bl.setPower(-0.25);
+                fl.setPower(-0.25);
+                br.setPower(-0.25);
+                fr.setPower(-0.25);
 
                 while ((opModeIsActive() && (runtime.seconds() <= 0.2))) {
                     idle();
@@ -371,7 +422,7 @@ public class auto extends LinearOpMode {
                 fr.setPower(-0.1);
                 br.setPower(-0.1);
 
-                while ((opModeIsActive() && (runtime.seconds() <= 0.2))) {
+                while ((opModeIsActive() && (runtime.seconds() <= 0.1))) {
                     idle();
                 }
         }
