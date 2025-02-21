@@ -93,6 +93,9 @@ public class auto extends LinearOpMode {
 
         while(opModeIsActive()) {
 
+            telemetry.addData("distance", distance.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+
             closeGrippers(lGripClose,rGripClose);
 
             posForward(1000, initPos);
@@ -133,8 +136,8 @@ public class auto extends LinearOpMode {
 
             stop(0.5);
 
-            if ((distance.getDistance(DistanceUnit.INCH)) >= 4
-                    && (distance.getDistance(DistanceUnit.INCH)) < 5) {
+            if (distance.getDistance(DistanceUnit.INCH) >= 4
+                    && distance.getDistance(DistanceUnit.INCH) < 5) {
 
                 score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
@@ -151,7 +154,9 @@ public class auto extends LinearOpMode {
                 requestOpModeStop();
 
             } else if (distance.getDistance(DistanceUnit.INCH) >= 5) {
-                posForward(100, 75);
+                posForward(120, 150);
+
+                trueStop("REVERSE");
 
                 score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
@@ -167,7 +172,7 @@ public class auto extends LinearOpMode {
 
                 requestOpModeStop();
             } else {
-                posReverse(150, 120);
+                posReverse(150, 140);
 
                 score(armPos, armTps, slidePos, slideReturnPos, slideTps, lGripOpen, rGripOpen);
 
@@ -395,10 +400,10 @@ public class auto extends LinearOpMode {
     public void trueStop (String mode) {
         switch (mode) {
             case "REVERSE":
-                bl.setPower(-0.25);
-                fl.setPower(-0.25);
-                br.setPower(-0.25);
-                fr.setPower(-0.25);
+                bl.setPower(-0.35);
+                fl.setPower(-0.35);
+                br.setPower(-0.35);
+                fr.setPower(-0.35);
 
                 while ((opModeIsActive() && (runtime.seconds() <= 0.2))) {
                     idle();

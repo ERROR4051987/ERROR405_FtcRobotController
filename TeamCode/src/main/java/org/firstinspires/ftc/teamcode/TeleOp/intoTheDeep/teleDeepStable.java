@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="teleDeepStable", group="intoTheDeep")
+@TeleOp(name="teleDeep", group="intoTheDeep")
 
 public class teleDeepStable extends LinearOpMode {
     // ni-ce kool aid person
@@ -26,6 +26,8 @@ public class teleDeepStable extends LinearOpMode {
     // declare servos
     private Servo lGripper = null;
     private Servo rGripper = null;
+    private Servo lHooker = null;
+    private Servo rHooker = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -43,6 +45,8 @@ public class teleDeepStable extends LinearOpMode {
         // init and set up servos
         lGripper = hardwareMap.get(Servo.class, "lGrip");
         rGripper = hardwareMap.get(Servo.class, "rGrip");
+        lHooker = hardwareMap.get(Servo.class, "lHooker");
+        rHooker = hardwareMap.get(Servo.class, "rHooker");
 
         // customize motor zero power behavior
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -87,10 +91,17 @@ public class teleDeepStable extends LinearOpMode {
         final int hangMaxSpeed = 4500;
         final int hangMin = 100;
         final int hangMinSpeed = 4000;
+
         final double lGripClose = 0.5;
         final double lGripOpen = 0.0;
         final double rGripClose = 0.5;
         final double rGripOpen = 1.0;
+
+        final double lHookerOpen = 1.0;
+        final double lHookerClose = 0.0;
+        final double rHookerOpen = 0.0;
+        final double rHookerClose = 1.0;
+
 
         //carter quit looking at this
         waitForStart();
@@ -105,6 +116,9 @@ public class teleDeepStable extends LinearOpMode {
 
             armLowerPower = gamepad2.left_trigger;
             armRaisePower = gamepad2.right_trigger;
+
+            lHooker.setPosition(lHookerOpen);
+            rHooker.setPosition(rHookerOpen);
 
             // player 2 booleans
             boolean hangStart = gamepad2.a && !gamepad2.y;
@@ -175,6 +189,15 @@ public class teleDeepStable extends LinearOpMode {
 
             }
 
+//            if (gamepad2.b) {
+//                slide.setTargetPosition(262);
+//                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                slide.setVelocity(500);
+//                sleep(1000);
+//                lGripper.setPosition(lGripOpen);
+//                rGripper.setPosition(rGripOpen);
+//            }
+
             if (hangStart) {
                 lHanger.setTargetPosition(hangMax);
                 lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -183,6 +206,8 @@ public class teleDeepStable extends LinearOpMode {
                 rHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 rHanger.setVelocity(hangMaxSpeed);
             } else if (hanging) {
+                lHooker.setPosition(lHookerClose);
+                rHooker.setPosition(rHookerClose);
                 lHanger.setTargetPosition(hangMin);
                 lHanger.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 lHanger.setVelocity(hangMinSpeed);
@@ -195,6 +220,11 @@ public class teleDeepStable extends LinearOpMode {
                 rHanger.setPower(0);
             }
 
+//            arm.setPower(armRaisePower - armLowerPower);
+
+//            if (gamepad2.start) {
+//                arm.setPower(0.8);
+//            }
             if (gamepad2.right_trigger > 0) {
                 arm.setVelocityPIDFCoefficients(10.0, 3.0, 0, 0.31);
                 arm.setVelocity(armVelocityScalar * armRaisePower);
@@ -209,6 +239,7 @@ public class teleDeepStable extends LinearOpMode {
             if (gamepad2.right_bumper) {
                 slide.setTargetPosition(292);
                 slide.setVelocity(800);
+//                slide.setPower(slideExtend);
             } else if (gamepad2.left_bumper) {
                 slide.setTargetPosition(10);
                 slide.setVelocity(slideRetract);
